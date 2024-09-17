@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Groceries</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+
+    <!-- Header -->
+    <header>
+        <div class="back-button">&lt;</div>
+        <div class="page-title">SideQuests</div>
+        <div class="header-icons">
+            <div>&#128214;</div>
+            <div>&#8942;</div>
+        </div>
+    </header>
+
+    <!-- List Title -->
+    <div class="list-title">
+        <div>Side Quests</div>
+    </div>
+
+    <!-- Add Task Form -->
+    <form action="{{ url_for('add') }}" method="POST" class="add-task-form">
+        <input type="text" name="title" placeholder="New Task" required>
+        <button type="submit">Add</button>
+    </form>
+
+    <!-- Tasks -->
+    <ul class="tasks">
+        {% for task in tasks %}
+        <li class="task-item {% if task.completed %}completed{% endif %}" onclick="toggleComplete({{ task.id }})">
+            <div class="checkbox">
+                {% if task.completed %}
+                &#9745; <!-- Checked box -->
+                {% else %}
+                &#9744; <!-- Unchecked box -->
+                {% endif %}
+            </div>
+            <div class="task-title">{{ task.title }}</div>
+            <div class="delete-button" onclick="event.stopPropagation(); deleteTask({{ task.id }});">&#10006;</div>
+        </li>
+        {% endfor %}
+    </ul>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+
+</html>

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>{{ list.name }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Include CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+
+    <!-- Header -->
+    <header>
+        <button class="back-button" onclick="window.location='{{ url_for('index') }}'">&larr;</button>
+        <h1>{{ list.name }}</h1>
+    </header>
+
+    <!-- Add Task Form -->
+    <form action="{{ url_for('add_task', list_id=list.id) }}" method="POST" class="add-task-form"
+        data-list-id="{{ list.id }}">
+        <input type="text" name="title" placeholder="New Task" required>
+        <button type="submit">Add</button>
+    </form>
+
+    <!-- Tasks -->
+    <div class="tasks-container" data-list-id="{{ list.id }}">
+        {% for task in tasks %}
+        <div class="task-card {% if task.completed %}completed{% endif %}" data-task-id="{{ task.id }}"
+            onclick="toggleComplete({{ list.id }}, {{ task.id }})">
+            <div class="task-content">
+                <div class="checkbox">
+                    {% if task.completed %}
+                    &#10003; <!-- Checked mark -->
+                    {% else %}
+                    &#9675; <!-- Unchecked circle -->
+                    {% endif %}
+                </div>
+                <div class="task-title">{{ task.title }}</div>
+            </div>
+            <button class="delete-task-button"
+                onclick="event.stopPropagation(); deleteTask({{ list.id }}, {{ task.id }});">
+                &times;
+            </button>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Include JavaScript -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+
+</html>

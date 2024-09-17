@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>SideQuests</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Include CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+
+    <!-- Header -->
+    <header>
+        <h1>SideQuests</h1>
+    </header>
+
+    <!-- Add List Form -->
+    <form action="{{ url_for('add_list') }}" method="POST" class="add-list-form">
+        <input type="text" name="name" placeholder="New List Name">
+        <button type="submit">Add List</button>
+    </form>
+
+    <!-- Lists -->
+    <div class="lists-container">
+        {% for list in lists %}
+        <div class="list-card" data-list-id="{{ list.id }}">
+            <a href="{{ url_for('view_list', list_id=list.id) }}" style="flex-grow: 1;">
+                <div class="list-header">
+                    <span class="list-name">{{ list.name }}</span>
+                </div>
+            </a>
+            <button class="delete-list-button" onclick="event.stopPropagation(); deleteList({{ list.id }});">
+                &times;
+            </button>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Include JavaScript -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+
+</html>

@@ -1,0 +1,188 @@
+/* Import a modern, clean font */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap');
+
+:root {
+    --background-color: #121212;
+    --text-color: #e0e0e0;
+    --header-background: #1f1f1f;
+    --card-background: #1e1e1e;
+    --card-border: #2c2c2c;
+    --button-background: #1a73e8;
+    --button-text-color: #ffffff;
+    --input-background: #2c2c2c;
+    --input-border: #444444;
+}
+
+/* General Styles */
+body {
+    margin: 0;
+    font-family: 'Roboto', sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-color);
+}
+
+header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* Center the header text */
+    background-color: var(--header-background);
+    padding: 15px;
+    position: sticky;
+    top: 0;
+}
+
+header h1 {
+    font-size: 28px;
+    /* Increased font size */
+    margin: 0;
+}
+
+/* Remove underlining from all links */
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+a:visited {
+    color: inherit;
+}
+
+a:hover {
+    color: inherit;
+}
+
+.back-button {
+    position: absolute;
+    left: 15px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: var(--text-color);
+}
+
+.add-list-form,
+.add-task-form {
+    display: flex;
+    padding: 15px;
+    gap: 10px;
+}
+
+.add-list-form input,
+.add-task-form input {
+    flex: 1;
+    padding: 12px;
+    /* Increased padding */
+    font-size: 18px;
+    /* Increased font size */
+    background-color: var(--input-background);
+    border: 1px solid var(--input-border);
+    border-radius: 5px;
+    color: var(--text-color);
+}
+
+.add-list-form button,
+.add-task-form button {
+    padding: 12px 24px;
+    /* Increased padding */
+    font-size: 18px;
+    /* Increased font size */
+    background-color: var(--button-background);
+    color: var(--button-text-color);
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.lists-container,
+.tasks-container {
+    display: flex;
+    flex-direction: column;
+    padding: 15px;
+    gap: 15px;
+}
+
+.list-card,
+.task-card {
+    background-color: var(--card-background);
+    border: 1px solid var(--card-border);
+    border-radius: 10px;
+    padding: 20px;
+    /* Increased padding */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: background-color 0.3s;
+}
+
+.list-card:hover,
+.task-card:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+    /* Subtle hover effect */
+}
+
+.list-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.list-name {
+    font-size: 24px;
+    /* Increased font size */
+    font-weight: 500;
+}
+
+.delete-list-button,
+.delete-task-button {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #dc3545;
+}
+
+.task-content {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    cursor: pointer;
+}
+
+.checkbox {
+    font-size: 24px;
+}
+
+.task-title {
+    font-size: 22px;
+    /* Increased font size */
+    flex: 1;
+}
+
+.completed .task-title {
+    text-decoration: line-through;
+    color: #6c757d;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 600px) {
+    header h1 {
+        font-size: 24px;
+    }
+
+    .list-name,
+    .task-title {
+        font-size: 20px;
+    }
+
+    .add-list-form input,
+    .add-task-form input {
+        font-size: 16px;
+    }
+
+    .add-list-form button,
+    .add-task-form button {
+        font-size: 16px;
+    }
+}
