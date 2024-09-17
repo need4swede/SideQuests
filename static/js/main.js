@@ -1,4 +1,69 @@
-// Remove the toggleDarkMode function and theme initialization code
+// Variables to hold the current edit context
+let currentEditType = null; // 'list' or 'task'
+let currentEditId = null;
+let currentListId = null; // Only needed for tasks
+
+// Function to show the edit modal
+function showEditModal(type, id, currentName, listId = null) {
+    currentEditType = type;
+    currentEditId = id;
+    currentListId = listId;
+
+    // Set modal title
+    const modalTitle = document.getElementById('modal-title');
+    modalTitle.textContent = type === 'list' ? 'Edit List Name' : 'Edit Task Name';
+
+    // Set current name in input
+    const editInput = document.getElementById('edit-input');
+    editInput.value = currentName;
+
+    // Show the modal
+    const editModal = document.getElementById('edit-modal');
+    editModal.style.display = 'flex';
+
+    // Focus on the input field
+    editInput.focus();
+}
+
+// Function to close the edit modal
+function closeEditModal() {
+    const editModal = document.getElementById('edit-modal');
+    editModal.style.display = 'none';
+
+    // Reset variables
+    currentEditType = null;
+    currentEditId = null;
+    currentListId = null;
+}
+
+// Handle form submission
+document.getElementById('edit-form').addEventListener('submit', function (event) {
+    event.preventDefault();
+
+    const newName = document.getElementById('edit-input').value.trim();
+
+    if (newName === '') {
+        alert('Name cannot be empty.');
+        return;
+    }
+
+    if (currentEditType === 'list') {
+        updateListName(currentEditId, newName);
+    } else if (currentEditType === 'task') {
+        updateTaskTitle(currentListId, currentEditId, newName);
+    }
+
+    // Close the modal after submission
+    closeEditModal();
+});
+
+// Close the modal when clicking outside of it
+window.addEventListener('click', function (event) {
+    const editModal = document.getElementById('edit-modal');
+    if (event.target === editModal) {
+        closeEditModal();
+    }
+});
 
 // Function to toggle task completion status
 function toggleComplete(listId, taskId) {
@@ -69,6 +134,58 @@ function deleteList(listId) {
     }
 }
 
+// Function to update the list name via AJAX
+function updateListName(listId, newName) {
+    fetch(`/update_list/${listId}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name: newName }),
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const listCard = document.querySelector(`.list-card[data-list-id='${listId}']`);
+                if (listCard) {
+                    const listNameElement = listCard.querySelector('.list-name');
+                    listNameElement.textContent = newName;
+                }
+            } else {
+                alert(data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+}
+
+// Function to update the task title via AJAX
+function updateTaskTitle(listId, taskId, newTitle) {
+    fetch(`/update_task/${listId}/${taskId}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ title: newTitle }),
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const taskCard = document.querySelector(`.task-card[data-task-id='${taskId}']`);
+                if (taskCard) {
+                    const taskTitleElement = taskCard.querySelector('.task-title');
+                    taskTitleElement.textContent = newTitle;
+                }
+            } else {
+                alert(data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+}
+
 // Handle Add Task Form Submission
 document.addEventListener('DOMContentLoaded', function () {
     const addTaskForm = document.querySelector('.add-task-form');
@@ -113,9 +230,10 @@ document.addEventListener('DOMContentLoaded', function () {
             const formData = new FormData(addListForm);
             let name = formData.get('name');
 
-            // Allow empty names; the server will handle it
-            // Optionally, you can trim whitespace
+            // Trim whitespace (optional)
             name = name.trim();
+
+            // We allow empty names; the server will handle defaulting to today's date
 
             fetch('/add_list', {
                 method: 'POST',
@@ -146,10 +264,11 @@ function addTaskToDOM(task) {
         const taskCard = document.createElement('div');
         taskCard.classList.add('task-card');
         taskCard.setAttribute('data-task-id', task.id);
-        taskCard.setAttribute('onclick', `toggleComplete(${listId}, ${task.id})`);
 
         const taskContent = document.createElement('div');
         taskContent.classList.add('task-content');
+        taskContent.style.flexGrow = '1';
+        taskContent.setAttribute('onclick', `toggleComplete(${listId}, ${task.id})`);
 
         const checkbox = document.createElement('div');
         checkbox.classList.add('checkbox');
@@ -162,6 +281,17 @@ function addTaskToDOM(task) {
         taskContent.appendChild(checkbox);
         taskContent.appendChild(taskTitle);
 
+        const taskButtons = document.createElement('div');
+        taskButtons.classList.add('task-buttons');
+
+        const editButton = document.createElement('button');
+        editButton.classList.add('edit-task-button');
+        editButton.innerHTML = '&#9998;';
+        editButton.addEventListener('click', function (event) {
+            event.stopPropagation();
+            showEditModal('task', task.id, task.title, listId);
+        });
+
         const deleteButton = document.createElement('button');
         deleteButton.classList.add('delete-task-button');
         deleteButton.innerHTML = '&times;';
@@ -170,8 +300,11 @@ function addTaskToDOM(task) {
             deleteTask(listId, task.id);
         });
 
+        taskButtons.appendChild(editButton);
+        taskButtons.appendChild(deleteButton);
+
         taskCard.appendChild(taskContent);
-        taskCard.appendChild(deleteButton);
+        taskCard.appendChild(taskButtons);
 
         // Prepend the new task to the top of the list
         tasksContainer.insertBefore(taskCard, tasksContainer.firstChild);
@@ -200,6 +333,14 @@ function addListToDOM(list) {
         listHeader.appendChild(listName);
         listLink.appendChild(listHeader);
 
+        const editButton = document.createElement('button');
+        editButton.classList.add('edit-list-button');
+        editButton.innerHTML = '&#9998;';
+        editButton.addEventListener('click', function (event) {
+            event.stopPropagation();
+            showEditModal('list', list.id, list.name);
+        });
+
         const deleteButton = document.createElement('button');
         deleteButton.classList.add('delete-list-button');
         deleteButton.innerHTML = '&times;';
@@ -209,89 +350,10 @@ function addListToDOM(list) {
         });
 
         listCard.appendChild(listLink);
+        listCard.appendChild(editButton);
         listCard.appendChild(deleteButton);
 
         // Prepend the new list to the top of the container
         listsContainer.insertBefore(listCard, listsContainer.firstChild);
     }
-}
-
-// Function to show the edit form for a list
-function showEditListForm(listId, currentName) {
-    // Create a prompt to get the new name
-    const newName = prompt('Edit List Name:', currentName);
-    if (newName !== null) {
-        updateListName(listId, newName.trim());
-    }
-}
-
-// Function to update the list name via AJAX
-function updateListName(listId, newName) {
-    if (newName === '') {
-        alert('List name cannot be empty.');
-        return;
-    }
-
-    fetch(`/update_list/${listId}`, {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ name: newName }),
-    })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                const listCard = document.querySelector(`.list-card[data-list-id='${listId}']`);
-                if (listCard) {
-                    const listNameElement = listCard.querySelector('.list-name');
-                    listNameElement.textContent = newName;
-                }
-            } else {
-                alert(data.error);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-        });
-}
-
-// Function to show the edit form for a task
-function showEditTaskForm(listId, taskId, currentTitle) {
-    // Create a prompt to get the new title
-    const newTitle = prompt('Edit Task Name:', currentTitle);
-    if (newTitle !== null) {
-        updateTaskTitle(listId, taskId, newTitle.trim());
-    }
-}
-
-// Function to update the task title via AJAX
-function updateTaskTitle(listId, taskId, newTitle) {
-    if (newTitle === '') {
-        alert('Task title cannot be empty.');
-        return;
-    }
-
-    fetch(`/update_task/${listId}/${taskId}`, {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ title: newTitle }),
-    })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                const taskCard = document.querySelector(`.task-card[data-task-id='${taskId}']`);
-                if (taskCard) {
-                    const taskTitleElement = taskCard.querySelector('.task-title');
-                    taskTitleElement.textContent = newTitle;
-                }
-            } else {
-                alert(data.error);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-        });
 }

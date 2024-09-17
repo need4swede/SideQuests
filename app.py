@@ -251,4 +251,4 @@ if __name__ == '__main__':
             print("Invalid port number provided. Using default port 5000.")
 
     # Run the Flask app
-    app.run(debug=True, port=port)
+    app.run(host='0.0.0.0', debug=True, port=port)
