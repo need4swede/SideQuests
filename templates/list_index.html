@@ -31,6 +31,12 @@
                     <span class="list-name">{{ list.name }}</span>
                 </div>
             </a>
+            <!-- Edit Button -->
+            <button class="edit-list-button"
+                onclick="event.stopPropagation(); showEditListForm({{ list.id }}, '{{ list.name }}');">
+                &#9998; <!-- Pencil icon -->
+            </button>
+            <!-- Delete Button -->
             <button class="delete-list-button" onclick="event.stopPropagation(); deleteList({{ list.id }});">
                 &times;
             </button>

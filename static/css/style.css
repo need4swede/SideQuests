@@ -1,6 +1,11 @@
-/* Import a modern, clean font */
+/*------------------------------------------------------------
+    1. Import Fonts
+------------------------------------------------------------*/
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap');
 
+/*------------------------------------------------------------
+    2. Root Variables (Dark Mode Colors)
+------------------------------------------------------------*/
 :root {
     --background-color: #121212;
     --text-color: #e0e0e0;
@@ -13,7 +18,9 @@
     --input-border: #444444;
 }
 
-/* General Styles */
+/*------------------------------------------------------------
+    3. Global Styles
+------------------------------------------------------------*/
 body {
     margin: 0;
     font-family: 'Roboto', sans-serif;
@@ -21,6 +28,19 @@ body {
     color: var(--text-color);
 }
 
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+a:visited,
+a:hover {
+    color: inherit;
+}
+
+/*------------------------------------------------------------
+    4. Header Styles
+------------------------------------------------------------*/
 header {
     display: flex;
     align-items: center;
@@ -38,20 +58,6 @@ header h1 {
     margin: 0;
 }
 
-/* Remove underlining from all links */
-a {
-    text-decoration: none;
-    color: inherit;
-}
-
-a:visited {
-    color: inherit;
-}
-
-a:hover {
-    color: inherit;
-}
-
 .back-button {
     position: absolute;
     left: 15px;
@@ -62,6 +68,9 @@ a:hover {
     color: var(--text-color);
 }
 
+/*------------------------------------------------------------
+    5. Forms (Add List and Add Task)
+------------------------------------------------------------*/
 .add-list-form,
 .add-task-form {
     display: flex;
@@ -95,6 +104,9 @@ a:hover {
     cursor: pointer;
 }
 
+/*------------------------------------------------------------
+    6. Lists and Tasks Containers
+------------------------------------------------------------*/
 .lists-container,
 .tasks-container {
     display: flex;
@@ -103,8 +115,10 @@ a:hover {
     gap: 15px;
 }
 
-.list-card,
-.task-card {
+/*------------------------------------------------------------
+    7. List Card Styles
+------------------------------------------------------------*/
+.list-card {
     background-color: var(--card-background);
     border: 1px solid var(--card-border);
     border-radius: 10px;
@@ -112,12 +126,9 @@ a:hover {
     /* Increased padding */
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    transition: background-color 0.3s;
 }
 
-.list-card:hover,
-.task-card:hover {
+.list-card:hover {
     background-color: rgba(255, 255, 255, 0.05);
     /* Subtle hover effect */
 }
@@ -134,13 +145,21 @@ a:hover {
     font-weight: 500;
 }
 
-.delete-list-button,
-.delete-task-button {
-    background: none;
-    border: none;
-    font-size: 24px;
-    cursor: pointer;
-    color: #dc3545;
+/*------------------------------------------------------------
+    8. Task Card Styles
+------------------------------------------------------------*/
+.task-card {
+    background-color: var(--card-background);
+    border: 1px solid var(--card-border);
+    border-radius: 10px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+}
+
+.task-card:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+    /* Subtle hover effect */
 }
 
 .task-content {
@@ -148,6 +167,13 @@ a:hover {
     align-items: center;
     gap: 15px;
     cursor: pointer;
+    flex-grow: 1;
+    /* Ensure it fills available space */
+}
+
+.task-buttons {
+    display: flex;
+    align-items: center;
 }
 
 .checkbox {
@@ -165,7 +191,36 @@ a:hover {
     color: #6c757d;
 }
 
-/* Mobile Responsiveness */
+/*------------------------------------------------------------
+    9. Buttons (Edit and Delete)
+------------------------------------------------------------*/
+.edit-list-button,
+.edit-task-button,
+.delete-list-button,
+.delete-task-button {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.edit-list-button,
+.edit-task-button {
+    color: #ffc107;
+    /* Amber color */
+    margin-right: 10px;
+    /* Space between edit and delete buttons */
+}
+
+.delete-list-button,
+.delete-task-button {
+    color: #dc3545;
+    /* Red color */
+}
+
+/*------------------------------------------------------------
+    10. Mobile Responsiveness
+------------------------------------------------------------*/
 @media (max-width: 600px) {
     header h1 {
         font-size: 24px;
@@ -177,12 +232,14 @@ a:hover {
     }
 
     .add-list-form input,
-    .add-task-form input {
-        font-size: 16px;
-    }
-
+    .add-task-form input,
     .add-list-form button,
     .add-task-form button {
         font-size: 16px;
     }
 }
+
+/*------------------------------------------------------------
+    11. Miscellaneous Styles
+------------------------------------------------------------*/
+/* Any additional styles can be added here */

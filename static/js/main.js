@@ -215,3 +215,83 @@ function addListToDOM(list) {
         listsContainer.insertBefore(listCard, listsContainer.firstChild);
     }
 }
+
+// Function to show the edit form for a list
+function showEditListForm(listId, currentName) {
+    // Create a prompt to get the new name
+    const newName = prompt('Edit List Name:', currentName);
+    if (newName !== null) {
+        updateListName(listId, newName.trim());
+    }
+}
+
+// Function to update the list name via AJAX
+function updateListName(listId, newName) {
+    if (newName === '') {
+        alert('List name cannot be empty.');
+        return;
+    }
+
+    fetch(`/update_list/${listId}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name: newName }),
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const listCard = document.querySelector(`.list-card[data-list-id='${listId}']`);
+                if (listCard) {
+                    const listNameElement = listCard.querySelector('.list-name');
+                    listNameElement.textContent = newName;
+                }
+            } else {
+                alert(data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+}
+
+// Function to show the edit form for a task
+function showEditTaskForm(listId, taskId, currentTitle) {
+    // Create a prompt to get the new title
+    const newTitle = prompt('Edit Task Name:', currentTitle);
+    if (newTitle !== null) {
+        updateTaskTitle(listId, taskId, newTitle.trim());
+    }
+}
+
+// Function to update the task title via AJAX
+function updateTaskTitle(listId, taskId, newTitle) {
+    if (newTitle === '') {
+        alert('Task title cannot be empty.');
+        return;
+    }
+
+    fetch(`/update_task/${listId}/${taskId}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ title: newTitle }),
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const taskCard = document.querySelector(`.task-card[data-task-id='${taskId}']`);
+                if (taskCard) {
+                    const taskTitleElement = taskCard.querySelector('.task-title');
+                    taskTitleElement.textContent = newTitle;
+                }
+            } else {
+                alert(data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+}
