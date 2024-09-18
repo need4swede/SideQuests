@@ -282,6 +282,7 @@ header h1 {
 /* Modal Heading */
 #modal-title {
     margin-top: 0;
+    margin-bottom: 4vh;
     font-size: 24px;
     text-align: center;
 }
@@ -330,6 +331,10 @@ header h1 {
     .modal-content {
         width: 95%;
         padding-bottom: 20vh;
+    }
+
+    #modal-title {
+        margin-bottom: 2vh;
     }
 }
 
