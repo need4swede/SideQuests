@@ -14,17 +14,15 @@
     <!-- Edit Modal -->
     <div id="edit-modal" class="modal">
         <div class="modal-content">
-            <span class="close-button">&times;</span>
             <h2 id="modal-title">Edit</h2>
             <form id="edit-form">
                 <input type="text" id="edit-input" required>
                 <button type="submit">Save</button>
-                <button type="button" id="cancel-edit">Cancel</button>
             </form>
         </div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
+    <script src="{{ url_for('static', filename='js/Sortable.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 </body>
 

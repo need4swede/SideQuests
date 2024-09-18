@@ -279,19 +279,6 @@ header h1 {
     /* Allow interactions inside modal */
 }
 
-/* Close Button */
-.close-button {
-    color: var(--text-color);
-    position: absolute;
-    top: 10px;
-    right: 15px;
-    font-size: 28px;
-    font-weight: bold;
-    background: none;
-    border: none;
-    cursor: pointer;
-}
-
 /* Modal Heading */
 #modal-title {
     margin-top: 0;
