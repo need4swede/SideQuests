@@ -77,16 +77,6 @@ def login():
             flash('Invalid username or password.', 'danger')
     return render_template('login.html')
 
-# Route for logout
-@app.route('/logout')
-def logout():
-    """
-    Logs the user out by clearing the session.
-    """
-    session.clear()
-    flash('You have been logged out.', 'info')
-    return redirect(url_for('login'))
-
 # Home page displaying all quests
 @app.route('/', methods=['GET'])
 @login_required
