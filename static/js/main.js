@@ -1,9 +1,20 @@
-// Variables to hold the current edit context
+/**
+ * main.js - JavaScript functions for SideQuests app
+ * Includes drag-and-drop functionality using SortableJS
+ */
+
+// Initialize global variables for the edit modal
 let currentEditType = null; // 'list' or 'task'
 let currentEditId = null;
 let currentListId = null; // Only needed for tasks
 
-// Function to show the edit modal
+/**
+ * Function to show the edit modal
+ * @param {string} type - Type of item ('list' or 'task')
+ * @param {number} id - ID of the item
+ * @param {string} currentName - Current name/title of the item
+ * @param {number} [listId=null] - ID of the list (for tasks)
+ */
 function showEditModal(type, id, currentName, listId = null) {
     currentEditType = type;
     currentEditId = id;
@@ -11,7 +22,7 @@ function showEditModal(type, id, currentName, listId = null) {
 
     // Set modal title
     const modalTitle = document.getElementById('modal-title');
-    modalTitle.textContent = type === 'list' ? 'Edit List Name' : 'Edit Task Name';
+    modalTitle.textContent = type === 'list' ? 'Edit Quest Name' : 'Edit Objective Name';
 
     // Set current name in input
     const editInput = document.getElementById('edit-input');
@@ -25,7 +36,9 @@ function showEditModal(type, id, currentName, listId = null) {
     editInput.focus();
 }
 
-// Function to close the edit modal
+/**
+ * Function to close the edit modal
+ */
 function closeEditModal() {
     const editModal = document.getElementById('edit-modal');
     editModal.style.display = 'none';
@@ -36,7 +49,7 @@ function closeEditModal() {
     currentListId = null;
 }
 
-// Handle form submission
+// Handle form submission for editing
 document.getElementById('edit-form').addEventListener('submit', function (event) {
     event.preventDefault();
 
@@ -65,7 +78,11 @@ window.addEventListener('click', function (event) {
     }
 });
 
-// Function to toggle task completion status
+/**
+ * Function to toggle objective completion status
+ * @param {number} listId - ID of the quest
+ * @param {number} taskId - ID of the objective
+ */
 function toggleComplete(listId, taskId) {
     fetch(`/list/${listId}/complete/${taskId}`, {
         method: 'POST'
@@ -88,9 +105,13 @@ function toggleComplete(listId, taskId) {
         });
 }
 
-// Function to delete a task
+/**
+ * Function to delete an objective
+ * @param {number} listId - ID of the quest
+ * @param {number} taskId - ID of the objective
+ */
 function deleteTask(listId, taskId) {
-    if (confirm('Are you sure you want to delete this task?')) {
+    if (confirm('Are you sure you want to delete this objective?')) {
         fetch(`/list/${listId}/delete/${taskId}`, {
             method: 'DELETE'
         })
@@ -111,9 +132,12 @@ function deleteTask(listId, taskId) {
     }
 }
 
-// Function to delete a list
+/**
+ * Function to delete a quest
+ * @param {number} listId - ID of the quest
+ */
 function deleteList(listId) {
-    if (confirm('Are you sure you want to delete this list and all its tasks?')) {
+    if (confirm('Are you sure you want to delete this quest and all its objectives?')) {
         fetch(`/delete_list/${listId}`, {
             method: 'DELETE'
         })
@@ -134,7 +158,11 @@ function deleteList(listId) {
     }
 }
 
-// Function to update the list name via AJAX
+/**
+ * Function to update the quest name via AJAX
+ * @param {number} listId - ID of the quest
+ * @param {string} newName - New name of the quest
+ */
 function updateListName(listId, newName) {
     fetch(`/update_list/${listId}`, {
         method: 'PUT',
@@ -160,7 +188,12 @@ function updateListName(listId, newName) {
         });
 }
 
-// Function to update the task title via AJAX
+/**
+ * Function to update the objective title via AJAX
+ * @param {number} listId - ID of the quest
+ * @param {number} taskId - ID of the objective
+ * @param {string} newTitle - New title of the objective
+ */
 function updateTaskTitle(listId, taskId, newTitle) {
     fetch(`/update_task/${listId}/${taskId}`, {
         method: 'PUT',
@@ -186,8 +219,9 @@ function updateTaskTitle(listId, taskId, newTitle) {
         });
 }
 
-// Handle Add Task Form Submission
+// Initialize after DOM content is loaded
 document.addEventListener('DOMContentLoaded', function () {
+    // Handle Add Objective Form Submission
     const addTaskForm = document.querySelector('.add-task-form');
     if (addTaskForm) {
         addTaskForm.addEventListener('submit', function (event) {
@@ -198,7 +232,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const title = formData.get('title');
 
             if (title.trim() === '') {
-                alert('Please enter a task title.');
+                alert('Please enter an objective title.');
                 return;
             }
 
@@ -221,7 +255,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Handle Add List Form Submission
+    // Handle Add Quest Form Submission
     const addListForm = document.querySelector('.add-list-form');
     if (addListForm) {
         addListForm.addEventListener('submit', function (event) {
@@ -230,10 +264,8 @@ document.addEventListener('DOMContentLoaded', function () {
             const formData = new FormData(addListForm);
             let name = formData.get('name');
 
-            // Trim whitespace (optional)
+            // Trim whitespace
             name = name.trim();
-
-            // We allow empty names; the server will handle defaulting to today's date
 
             fetch('/add_list', {
                 method: 'POST',
@@ -255,7 +287,10 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 });
 
-// Function to add a new task to the DOM
+/**
+ * Function to add a new objective to the DOM
+ * @param {Object} task - Task object containing id, title, and completed status
+ */
 function addTaskToDOM(task) {
     const tasksContainer = document.querySelector('.tasks-container');
     if (tasksContainer) {
@@ -306,12 +341,15 @@ function addTaskToDOM(task) {
         taskCard.appendChild(taskContent);
         taskCard.appendChild(taskButtons);
 
-        // Prepend the new task to the top of the list
-        tasksContainer.insertBefore(taskCard, tasksContainer.firstChild);
+        // Append the new task to the container
+        tasksContainer.appendChild(taskCard);
     }
 }
 
-// Function to add a new list to the DOM
+/**
+ * Function to add a new quest to the DOM
+ * @param {Object} list - List object containing id and name
+ */
 function addListToDOM(list) {
     const listsContainer = document.querySelector('.lists-container');
     if (listsContainer) {
@@ -353,7 +391,90 @@ function addListToDOM(list) {
         listCard.appendChild(editButton);
         listCard.appendChild(deleteButton);
 
-        // Prepend the new list to the top of the container
-        listsContainer.insertBefore(listCard, listsContainer.firstChild);
+        // Append the new list to the container
+        listsContainer.appendChild(listCard);
     }
 }
+
+/*===========================================
+=            Drag-and-Drop Sorting          =
+===========================================*/
+
+// Initialize SortableJS for Quests (Lists)
+const questsContainer = document.getElementById('quests-container');
+if (questsContainer) {
+    Sortable.create(questsContainer, {
+        animation: 150,
+        handle: '.list-card', // Allow dragging by clicking on the list card
+        ghostClass: 'sortable-ghost', // Class name for the drop placeholder
+        onEnd: function (evt) {
+            // Update quest order when drag-and-drop action ends
+            updateQuestOrder();
+        }
+    });
+}
+
+// Initialize SortableJS for Objectives (Tasks)
+const objectivesContainer = document.getElementById('objectives-container');
+if (objectivesContainer) {
+    Sortable.create(objectivesContainer, {
+        animation: 150,
+        handle: '.task-card', // Allow dragging by clicking on the task card
+        ghostClass: 'sortable-ghost',
+        onEnd: function (evt) {
+            // Update objective order when drag-and-drop action ends
+            updateObjectiveOrder();
+        }
+    });
+}
+
+/**
+ * Function to update the order of quests on the server
+ */
+function updateQuestOrder() {
+    const questsContainer = document.getElementById('quests-container');
+    const quests = questsContainer.querySelectorAll('.list-card');
+    const orderedIds = Array.from(quests).map(quest => quest.getAttribute('data-list-id'));
+
+    fetch('/update_quest_order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ordered_ids: orderedIds })
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (!data.success) {
+                alert('Failed to update quest order.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+}
+
+/**
+ * Function to update the order of objectives within a quest on the server
+ */
+function updateObjectiveOrder() {
+    const objectivesContainer = document.getElementById('objectives-container');
+    const listId = objectivesContainer.getAttribute('data-list-id');
+    const objectives = objectivesContainer.querySelectorAll('.task-card');
+    const orderedIds = Array.from(objectives).map(obj => obj.getAttribute('data-task-id'));
+
+    fetch(`/update_objective_order/${listId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ordered_ids: orderedIds })
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (!data.success) {
+                alert('Failed to update objective order.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+}
+
+/*=====  End of Drag-and-Drop Sorting  =====*/

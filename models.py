@@ -2,21 +2,23 @@ from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 
-class List(db.Model):
+class Quest(db.Model):
     """
-    Model representing a to-do list.
+    Model representing a quest.
     """
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
+    order = db.Column(db.Integer, default=0)  # Order field
 
-    # Relationship to tasks
-    tasks = db.relationship('Task', backref='list', lazy=True)
+    # Relationship to objectives
+    objectives = db.relationship('Objective', backref='quest', lazy=True)
 
-class Task(db.Model):
+class Objective(db.Model):
     """
-    Model representing a task within a to-do list.
+    Model representing an objective within a quest.
     """
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(200), nullable=False)
     completed = db.Column(db.Boolean, default=False)
-    list_id = db.Column(db.Integer, db.ForeignKey('list.id'), nullable=False)
+    order = db.Column(db.Integer, default=0)  # Order field
+    list_id = db.Column(db.Integer, db.ForeignKey('quest.id'), nullable=False)

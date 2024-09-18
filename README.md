@@ -1,10 +1,12 @@
-# SideQuests - Task Tracker
+# SideQuests - Objective Tracker
 
 ![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 ![Docker](https://img.shields.io/badge/docker-ready-brightgreen.svg)
 
 SideQuests provides an intuitive and mobile friendly web-interface for managing tasks and objectives.
+
+<img src="image.png" width="900">
 
 ## 🐳 Setup
 
@@ -32,10 +34,10 @@ services:
 ## ✨ Core Functionality
 
 **Quests**
-   - Quests contain individual tasks. Leaving the title blank automatically assigns today's date as the title.
+   - Quests contain individual Objectives. Leaving the title blank automatically assigns today's date as the title.
 
-**Tasks**
-   - Tasks are individual objectives within Quests. You need to complete every Task to finish a Quest.
+**Objectives**
+   - Objectives are individual tasks within Quests. You need to complete every Objectives to finish a Quest.
 
 ## 🎨 UI Goodies
 
@@ -46,7 +48,7 @@ services:
    - Fully responsive pages and elements makes for a great PWA experience.
 
 **Block Level Design**
-   - Drag and drop elements to easily organize your Quests & Tasks.
+   - Drag and drop elements to easily organize your Quests & Objectives.
 
 **Dark Mode**
    - No brainer.
