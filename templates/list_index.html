@@ -1,21 +1,16 @@
 {% extends "base.html" %}
-
 {% block title %}Your Quests - SideQuests{% endblock %}
-
 {% block content %}
-<!-- Header -->
 <header>
     <h1>Your Quests</h1>
 </header>
 
-<!-- Add Quest Form -->
 <form action="{{ url_for('add_list') }}" method="POST" class="add-list-form">
     <input type="text" name="name" placeholder="New Quest">
     <button type="submit">Add</button>
 </form>
 
-<!-- Quests Container -->
-<div class="lists-container" id="quests-container">
+<div id="quests-container" class="lists-container">
     {% for quest in lists %}
     <div class="list-card" data-list-id="{{ quest.id }}">
         <a href="{{ url_for('view_list', list_id=quest.id) }}" style="flex-grow: 1;">
@@ -23,15 +18,8 @@
                 <span class="list-name">{{ quest.name }}</span>
             </div>
         </a>
-        <!-- Edit Button -->
-        <button class="edit-list-button"
-            onclick="event.stopPropagation(); showEditModal('list', {{ quest.id }}, '{{ quest.name }}');">
-            &#9998; <!-- Pencil icon -->
-        </button>
-        <!-- Delete Button -->
-        <button class="delete-list-button" onclick="event.stopPropagation(); deleteList({{ quest.id }});">
-            &times;
-        </button>
+        <button class="edit-list-button">✎</button>
+        <button class="delete-list-button">&times;</button>
     </div>
     {% endfor %}
 </div>

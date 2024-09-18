@@ -3,35 +3,29 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}SideQuests{% endblock %}</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- Include CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 
 <body>
-
-    {% block content %}
-    {% endblock %}
+    {% block content %}{% endblock %}
 
     <!-- Edit Modal -->
     <div id="edit-modal" class="modal">
         <div class="modal-content">
-            <span class="close-button" onclick="closeEditModal()">&times;</span>
+            <span class="close-button">&times;</span>
             <h2 id="modal-title">Edit</h2>
             <form id="edit-form">
-                <input type="text" id="edit-input" placeholder="Enter new name" required>
+                <input type="text" id="edit-input" required>
                 <button type="submit">Save</button>
+                <button type="button" id="cancel-edit">Cancel</button>
             </form>
         </div>
     </div>
 
-    <!-- Include SortableJS -->
-    <script src="{{ url_for('static', filename='js/Sortable.min.js') }}"></script>
-
-    <!-- Include main.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
-
 </body>
 
 </html>

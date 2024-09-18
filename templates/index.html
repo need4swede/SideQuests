@@ -1,54 +1,171 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "base.html" %}
+{% block title %}{{ list.name }} - SideQuests{% endblock %}
+{% block content %}
+<header>
+    <button class="back-button">&larr;</button>
+    <h1>{{ list.name }}</h1>
+</header>
 
-<head>
-    <meta charset="UTF-8">
-    <title>Groceries</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-</head>
+<form action="{{ url_for('add_task', list_id=list.id) }}" method="POST" class="add-task-form"
+    data-list-id="{{ list.id }}">
+    <input type="text" name="title" placeholder="New Objective">
+    <button type="submit">Add</button>
+</form>
 
-<body>
-
-    <!-- Header -->
-    <header>
-        <div class="back-button">&lt;</div>
-        <div class="page-title">SideQuests</div>
-        <div class="header-icons">
-            <div>&#128214;</div>
-            <div>&#8942;</div>
-        </div>
-    </header>
-
-    <!-- List Title -->
-    <div class="list-title">
-        <div>Side Quests</div>
-    </div>
-
-    <!-- Add Task Form -->
-    <form action="{{ url_for('add') }}" method="POST" class="add-task-form">
-        <input type="text" name="title" placeholder="New Task" required>
-        <button type="submit">Add</button>
-    </form>
-
-    <!-- Tasks -->
-    <ul class="tasks">
-        {% for task in tasks %}
-        <li class="task-item {% if task.completed %}completed{% endif %}" onclick="toggleComplete({{ task.id }})">
+<div id="objectives-container" class="tasks-container" data-list-id="{{ list.id }}">
+    {% for objective in tasks %}
+    <div class="task-card {% if objective.completed %}completed{% endif %}" data-task-id="{{ objective.id }}">
+        <div class="task-content" style="flex-grow: 1;">
             <div class="checkbox">
-                {% if task.completed %}
-                &#9745; <!-- Checked box -->
+                {% if objective.completed %}
+                ✓
                 {% else %}
-                &#9744; <!-- Unchecked box -->
+                ○
                 {% endif %}
             </div>
-            <div class="task-title">{{ task.title }}</div>
-            <div class="delete-button" onclick="event.stopPropagation(); deleteTask({{ task.id }});">&#10006;</div>
-        </li>
-        {% endfor %}
-    </ul>
+            <div class="task-title">{{ objective.title }}</div>
+        </div>
+        <div class="task-buttons">
+            <button class="edit-task-button">✎</button>
+            <button class="delete-task-button">&times;</button>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}{% extends "base.html" %}
+{% block title %}{{ list.name }} - SideQuests{% endblock %}
+{% block content %}
+<header>
+    <button class="back-button">&larr;</button>
+    <h1>{{ list.name }}</h1>
+</header>
 
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
-</body>
+<form action="{{ url_for('add_task', list_id=list.id) }}" method="POST" class="add-task-form"
+    data-list-id="{{ list.id }}">
+    <input type="text" name="title" placeholder="New Objective">
+    <button type="submit">Add</button>
+</form>
 
-</html>
+<div id="objectives-container" class="tasks-container" data-list-id="{{ list.id }}">
+    {% for objective in tasks %}
+    <div class="task-card {% if objective.completed %}completed{% endif %}" data-task-id="{{ objective.id }}">
+        <div class="task-content" style="flex-grow: 1;">
+            <div class="checkbox">
+                {% if objective.completed %}
+                ✓
+                {% else %}
+                ○
+                {% endif %}
+            </div>
+            <div class="task-title">{{ objective.title }}</div>
+        </div>
+        <div class="task-buttons">
+            <button class="edit-task-button">✎</button>
+            <button class="delete-task-button">&times;</button>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}{% extends "base.html" %}
+{% block title %}{{ list.name }} - SideQuests{% endblock %}
+{% block content %}
+<header>
+    <button class="back-button">&larr;</button>
+    <h1>{{ list.name }}</h1>
+</header>
+
+<form action="{{ url_for('add_task', list_id=list.id) }}" method="POST" class="add-task-form"
+    data-list-id="{{ list.id }}">
+    <input type="text" name="title" placeholder="New Objective">
+    <button type="submit">Add</button>
+</form>
+
+<div id="objectives-container" class="tasks-container" data-list-id="{{ list.id }}">
+    {% for objective in tasks %}
+    <div class="task-card {% if objective.completed %}completed{% endif %}" data-task-id="{{ objective.id }}">
+        <div class="task-content" style="flex-grow: 1;">
+            <div class="checkbox">
+                {% if objective.completed %}
+                ✓
+                {% else %}
+                ○
+                {% endif %}
+            </div>
+            <div class="task-title">{{ objective.title }}</div>
+        </div>
+        <div class="task-buttons">
+            <button class="edit-task-button">✎</button>
+            <button class="delete-task-button">&times;</button>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}{% extends "base.html" %}
+{% block title %}{{ list.name }} - SideQuests{% endblock %}
+{% block content %}
+<header>
+    <button class="back-button">&larr;</button>
+    <h1>{{ list.name }}</h1>
+</header>
+
+<form action="{{ url_for('add_task', list_id=list.id) }}" method="POST" class="add-task-form"
+    data-list-id="{{ list.id }}">
+    <input type="text" name="title" placeholder="New Objective">
+    <button type="submit">Add</button>
+</form>
+
+<div id="objectives-container" class="tasks-container" data-list-id="{{ list.id }}">
+    {% for objective in tasks %}
+    <div class="task-card {% if objective.completed %}completed{% endif %}" data-task-id="{{ objective.id }}">
+        <div class="task-content" style="flex-grow: 1;">
+            <div class="checkbox">
+                {% if objective.completed %}
+                ✓
+                {% else %}
+                ○
+                {% endif %}
+            </div>
+            <div class="task-title">{{ objective.title }}</div>
+        </div>
+        <div class="task-buttons">
+            <button class="edit-task-button">✎</button>
+            <button class="delete-task-button">&times;</button>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}{% extends "base.html" %}
+{% block title %}{{ list.name }} - SideQuests{% endblock %}
+{% block content %}
+<header>
+    <button class="back-button">&larr;</button>
+    <h1>{{ list.name }}</h1>
+</header>
+
+<form action="{{ url_for('add_task', list_id=list.id) }}" method="POST" class="add-task-form"
+    data-list-id="{{ list.id }}">
+    <input type="text" name="title" placeholder="New Objective">
+    <button type="submit">Add</button>
+</form>
+
+<div id="objectives-container" class="tasks-container" data-list-id="{{ list.id }}">
+    {% for objective in tasks %}
+    <div class="task-card {% if objective.completed %}completed{% endif %}" data-task-id="{{ objective.id }}">
+        <div class="task-content" style="flex-grow: 1;">
+            <div class="checkbox">
+                {% if objective.completed %}
+                ✓
+                {% else %}
+                ○
+                {% endif %}
+            </div>
+            <div class="task-title">{{ objective.title }}</div>
+        </div>
+        <div class="task-buttons">
+            <button class="edit-task-button">✎</button>
+            <button class="delete-task-button">&times;</button>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

@@ -69,23 +69,11 @@ header h1 {
 .back-button {
     position: absolute;
     left: 15px;
-    top: 15px;
     background: none;
     border: none;
     font-size: 24px;
     cursor: pointer;
     color: var(--text-color);
-    z-index: 10;
-    /* Ensure it's above other elements */
-}
-
-/* Adjust back-button for mobile */
-@media (max-width: 600px) {
-    .back-button {
-        font-size: 20px;
-        top: 10px;
-        left: 10px;
-    }
 }
 
 /*------------------------------------------------------------
@@ -222,7 +210,7 @@ header h1 {
 .edit-list-button,
 .edit-task-button {
     color: #ffc107;
-    margin-right: 10px;
+    margin-right: 1.5em;
 }
 
 .delete-list-button,

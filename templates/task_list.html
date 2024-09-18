@@ -1,48 +1,33 @@
 {% extends "base.html" %}
-
 {% block title %}{{ list.name }} - SideQuests{% endblock %}
-
 {% block content %}
-<!-- Header -->
 <header>
-    <button class="back-button" onclick="window.location='{{ url_for('index') }}'">&larr;</button>
+    <button class="back-button">&larr;</button>
     <h1>{{ list.name }}</h1>
 </header>
 
-<!-- Add Objective Form -->
 <form action="{{ url_for('add_task', list_id=list.id) }}" method="POST" class="add-task-form"
     data-list-id="{{ list.id }}">
     <input type="text" name="title" placeholder="New Objective">
     <button type="submit">Add</button>
 </form>
 
-<!-- Objectives Container -->
-<div class="tasks-container" id="objectives-container" data-list-id="{{ list.id }}">
+<div id="objectives-container" class="tasks-container" data-list-id="{{ list.id }}">
     {% for objective in tasks %}
     <div class="task-card {% if objective.completed %}completed{% endif %}" data-task-id="{{ objective.id }}">
-        <!-- Task Content -->
-        <div class="task-content" style="flex-grow: 1;" onclick="toggleComplete({{ list.id }}, {{ objective.id }})">
+        <div class="task-content" style="flex-grow: 1;">
             <div class="checkbox">
                 {% if objective.completed %}
-                &#10003; <!-- Checked mark -->
+                ✓
                 {% else %}
-                &#9675; <!-- Unchecked circle -->
+                ○
                 {% endif %}
             </div>
             <div class="task-title">{{ objective.title }}</div>
         </div>
-        <!-- Buttons Container -->
         <div class="task-buttons">
-            <!-- Edit Button -->
-            <button class="edit-task-button"
-                onclick="event.stopPropagation(); showEditModal('task', {{ objective.id }}, '{{ objective.title }}', {{ list.id }});">
-                &#9998; <!-- Pencil icon -->
-            </button>
-            <!-- Delete Button -->
-            <button class="delete-task-button"
-                onclick="event.stopPropagation(); deleteTask({{ list.id }}, {{ objective.id }});">
-                &times;
-            </button>
+            <button class="edit-task-button">✎</button>
+            <button class="delete-task-button">&times;</button>
         </div>
     </div>
     {% endfor %}

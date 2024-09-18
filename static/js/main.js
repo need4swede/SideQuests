@@ -49,35 +49,6 @@ function closeEditModal() {
     currentListId = null;
 }
 
-// Handle form submission for editing
-document.getElementById('edit-form').addEventListener('submit', function (event) {
-    event.preventDefault();
-
-    const newName = document.getElementById('edit-input').value.trim();
-
-    if (newName === '') {
-        alert('Name cannot be empty.');
-        return;
-    }
-
-    if (currentEditType === 'list') {
-        updateListName(currentEditId, newName);
-    } else if (currentEditType === 'task') {
-        updateTaskTitle(currentListId, currentEditId, newName);
-    }
-
-    // Close the modal after submission
-    closeEditModal();
-});
-
-// Close the modal when clicking outside of it
-window.addEventListener('click', function (event) {
-    const editModal = document.getElementById('edit-modal');
-    if (event.target === editModal) {
-        closeEditModal();
-    }
-});
-
 /**
  * Function to toggle objective completion status
  * @param {number} listId - ID of the quest
@@ -219,74 +190,6 @@ function updateTaskTitle(listId, taskId, newTitle) {
         });
 }
 
-// Initialize after DOM content is loaded
-document.addEventListener('DOMContentLoaded', function () {
-    // Handle Add Objective Form Submission
-    const addTaskForm = document.querySelector('.add-task-form');
-    if (addTaskForm) {
-        addTaskForm.addEventListener('submit', function (event) {
-            event.preventDefault(); // Prevent the default form submission
-
-            const listId = addTaskForm.getAttribute('data-list-id');
-            const formData = new FormData(addTaskForm);
-            const title = formData.get('title');
-
-            if (title.trim() === '') {
-                alert('Please enter an objective title.');
-                return;
-            }
-
-            fetch(`/list/${listId}/add_task`, {
-                method: 'POST',
-                body: formData
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.error) {
-                        alert(data.error);
-                    } else {
-                        addTaskToDOM(data);
-                        addTaskForm.reset();
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                });
-        });
-    }
-
-    // Handle Add Quest Form Submission
-    const addListForm = document.querySelector('.add-list-form');
-    if (addListForm) {
-        addListForm.addEventListener('submit', function (event) {
-            event.preventDefault();
-
-            const formData = new FormData(addListForm);
-            let name = formData.get('name');
-
-            // Trim whitespace
-            name = name.trim();
-
-            fetch('/add_list', {
-                method: 'POST',
-                body: formData
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.error) {
-                        alert(data.error);
-                    } else {
-                        addListToDOM(data);
-                        addListForm.reset();
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                });
-        });
-    }
-});
-
 /**
  * Function to add a new objective to the DOM
  * @param {Object} task - Task object containing id, title, and completed status
@@ -303,7 +206,6 @@ function addTaskToDOM(task) {
         const taskContent = document.createElement('div');
         taskContent.classList.add('task-content');
         taskContent.style.flexGrow = '1';
-        taskContent.setAttribute('onclick', `toggleComplete(${listId}, ${task.id})`);
 
         const checkbox = document.createElement('div');
         checkbox.classList.add('checkbox');
@@ -322,18 +224,10 @@ function addTaskToDOM(task) {
         const editButton = document.createElement('button');
         editButton.classList.add('edit-task-button');
         editButton.innerHTML = '&#9998;';
-        editButton.addEventListener('click', function (event) {
-            event.stopPropagation();
-            showEditModal('task', task.id, task.title, listId);
-        });
 
         const deleteButton = document.createElement('button');
         deleteButton.classList.add('delete-task-button');
         deleteButton.innerHTML = '&times;';
-        deleteButton.addEventListener('click', function (event) {
-            event.stopPropagation();
-            deleteTask(listId, task.id);
-        });
 
         taskButtons.appendChild(editButton);
         taskButtons.appendChild(deleteButton);
@@ -343,6 +237,17 @@ function addTaskToDOM(task) {
 
         // Append the new task to the container
         tasksContainer.appendChild(taskCard);
+
+        // Add event listeners
+        taskContent.addEventListener('click', () => toggleComplete(listId, task.id));
+        editButton.addEventListener('click', (event) => {
+            event.stopPropagation();
+            showEditModal('task', task.id, task.title, listId);
+        });
+        deleteButton.addEventListener('click', (event) => {
+            event.stopPropagation();
+            deleteTask(listId, task.id);
+        });
     }
 }
 
@@ -374,18 +279,10 @@ function addListToDOM(list) {
         const editButton = document.createElement('button');
         editButton.classList.add('edit-list-button');
         editButton.innerHTML = '&#9998;';
-        editButton.addEventListener('click', function (event) {
-            event.stopPropagation();
-            showEditModal('list', list.id, list.name);
-        });
 
         const deleteButton = document.createElement('button');
         deleteButton.classList.add('delete-list-button');
         deleteButton.innerHTML = '&times;';
-        deleteButton.addEventListener('click', function (event) {
-            event.stopPropagation();
-            deleteList(list.id);
-        });
 
         listCard.appendChild(listLink);
         listCard.appendChild(editButton);
@@ -393,39 +290,17 @@ function addListToDOM(list) {
 
         // Append the new list to the container
         listsContainer.appendChild(listCard);
+
+        // Add event listeners
+        editButton.addEventListener('click', (event) => {
+            event.stopPropagation();
+            showEditModal('list', list.id, list.name);
+        });
+        deleteButton.addEventListener('click', (event) => {
+            event.stopPropagation();
+            deleteList(list.id);
+        });
     }
-}
-
-/*===========================================
-=            Drag-and-Drop Sorting          =
-===========================================*/
-
-// Initialize SortableJS for Quests (Lists)
-const questsContainer = document.getElementById('quests-container');
-if (questsContainer) {
-    Sortable.create(questsContainer, {
-        animation: 150,
-        handle: '.list-card', // Allow dragging by clicking on the list card
-        ghostClass: 'sortable-ghost', // Class name for the drop placeholder
-        onEnd: function (evt) {
-            // Update quest order when drag-and-drop action ends
-            updateQuestOrder();
-        }
-    });
-}
-
-// Initialize SortableJS for Objectives (Tasks)
-const objectivesContainer = document.getElementById('objectives-container');
-if (objectivesContainer) {
-    Sortable.create(objectivesContainer, {
-        animation: 150,
-        handle: '.task-card', // Allow dragging by clicking on the task card
-        ghostClass: 'sortable-ghost',
-        onEnd: function (evt) {
-            // Update objective order when drag-and-drop action ends
-            updateObjectiveOrder();
-        }
-    });
 }
 
 /**
@@ -477,4 +352,179 @@ function updateObjectiveOrder() {
         });
 }
 
-/*=====  End of Drag-and-Drop Sorting  =====*/
+/**
+ * Function to handle the back button click
+ */
+function handleBackButton() {
+    window.location.href = '/'; // Assuming the root URL is the index page
+}
+
+/**
+ * Function to initialize all event listeners
+ */
+function initializeEventListeners() {
+    // Back button
+    const backButton = document.querySelector('.back-button');
+    if (backButton) {
+        backButton.addEventListener('click', handleBackButton);
+    }
+
+    // Edit form submission
+    const editForm = document.getElementById('edit-form');
+    if (editForm) {
+        editForm.addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            const newName = document.getElementById('edit-input').value.trim();
+
+            if (newName === '') {
+                alert('Name cannot be empty.');
+                return;
+            }
+
+            if (currentEditType === 'list') {
+                updateListName(currentEditId, newName);
+            } else if (currentEditType === 'task') {
+                updateTaskTitle(currentListId, currentEditId, newName);
+            }
+
+            // Close the modal after submission
+            closeEditModal();
+        });
+    }
+
+    // Close modal when clicking outside
+    window.addEventListener('click', function (event) {
+        const editModal = document.getElementById('edit-modal');
+        if (event.target === editModal) {
+            closeEditModal();
+        }
+    });
+
+    // Add Task Form
+    const addTaskForm = document.querySelector('.add-task-form');
+    if (addTaskForm) {
+        addTaskForm.addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            const listId = addTaskForm.getAttribute('data-list-id');
+            const formData = new FormData(addTaskForm);
+            const title = formData.get('title');
+
+            if (title.trim() === '') {
+                alert('Please enter an objective title.');
+                return;
+            }
+
+            fetch(`/list/${listId}/add_task`, {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        alert(data.error);
+                    } else {
+                        addTaskToDOM(data);
+                        addTaskForm.reset();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        });
+    }
+
+    // Add Quest Form
+    const addListForm = document.querySelector('.add-list-form');
+    if (addListForm) {
+        addListForm.addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            const formData = new FormData(addListForm);
+            let name = formData.get('name');
+
+            // Trim whitespace
+            name = name.trim();
+
+            fetch('/add_list', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        alert(data.error);
+                    } else {
+                        addListToDOM(data);
+                        addListForm.reset();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        });
+    }
+
+    // Initialize SortableJS for Quests (Lists)
+    const questsContainer = document.getElementById('quests-container');
+    if (questsContainer) {
+        Sortable.create(questsContainer, {
+            animation: 150,
+            handle: '.list-card', // Allow dragging by clicking on the list card
+            ghostClass: 'sortable-ghost', // Class name for the drop placeholder
+            onEnd: function (evt) {
+                // Update quest order when drag-and-drop action ends
+                updateQuestOrder();
+            }
+        });
+    }
+
+    // Initialize SortableJS for Objectives (Tasks)
+    const objectivesContainer = document.getElementById('objectives-container');
+    if (objectivesContainer) {
+        Sortable.create(objectivesContainer, {
+            animation: 150,
+            handle: '.task-card', // Allow dragging by clicking on the task card
+            ghostClass: 'sortable-ghost',
+            onEnd: function (evt) {
+                // Update objective order when drag-and-drop action ends
+                updateObjectiveOrder();
+            }
+        });
+    }
+
+    // Add event listeners for existing elements
+    document.querySelectorAll('.task-card').forEach(card => {
+        const listId = card.closest('.tasks-container').dataset.listId;
+        const taskId = card.dataset.taskId;
+
+        card.querySelector('.task-content').addEventListener('click', () => toggleComplete(listId, taskId));
+        card.querySelector('.edit-task-button').addEventListener('click', (event) => {
+            event.stopPropagation();
+            showEditModal('task', taskId, card.querySelector('.task-title').textContent, listId);
+        });
+        card.querySelector('.delete-task-button').addEventListener('click', (event) => {
+            event.stopPropagation();
+            deleteTask(listId, taskId);
+        });
+    });
+
+    document.querySelectorAll('.list-card').forEach(card => {
+        const listId = card.dataset.listId;
+
+        card.querySelector('.edit-list-button').addEventListener('click', (event) => {
+            event.stopPropagation();
+            showEditModal('list', listId, card.querySelector('.list-name').textContent);
+        });
+        card.querySelector('.delete-list-button').addEventListener('click', (event) => {
+            event.stopPropagation();
+            deleteList(listId);
+        });
+    });
+}
+
+// Call the initialize function when the DOM is loaded
+document.addEventListener('DOMContentLoaded', function () {
+    initializeEventListeners();
+});
