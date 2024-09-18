@@ -5,6 +5,9 @@ from functools import wraps
 import os
 from datetime import datetime
 
+from dotenv import load_dotenv
+load_dotenv()
+
 app = Flask(__name__)
 
 # Configure the SQLite database
@@ -317,7 +320,4 @@ def update_objective_order(list_id):
 
 # Run the application
 if __name__ == '__main__':
-    # Get the host and port from environment variables, with defaults
-    host = os.environ.get('FLASK_RUN_HOST', '0.0.0.0')
-    port = int(os.environ.get('PORT', 8080))
-    app.run(debug=True, host=host, port=port)
+    app.run(debug=True, host='0.0.0.0', port=8080)
