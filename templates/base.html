@@ -12,7 +12,7 @@
 <header>
     {% if session.get('logged_in') %}
     <nav class="navbar">
-        <a href="{{ url_for('logout') }}">Logout</a>
+        <a href="{{ url_for('logout') }}" class="logout-button">Logout</a>
     </nav>
     {% endif %}
 </header>

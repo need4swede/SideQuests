@@ -12,7 +12,8 @@
     --header-background: #1f1f1f;
     --card-background: #1e1e1e;
     --card-border: #2c2c2c;
-    --button-background: #1a73e8;
+    --button-background: #007bff;
+    --button-hover-background: #0056b3;
     --button-text-color: #ffffff;
     --input-background: #2c2c2c;
     --input-border: #444444;
@@ -428,4 +429,40 @@ header h1 {
 .flashes .info {
     background-color: #17a2b8;
     color: white;
+}
+
+/*------------------------------------------------------------
+    14. Logout Button Styles
+------------------------------------------------------------*/
+.navbar {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+}
+
+.logout-button {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: var(--button-background);
+    color: var(--button-text-color);
+    border: none;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.logout-button:hover {
+    background-color: var(--button-hover-background);
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+    .navbar {
+        position: static;
+        text-align: center;
+        margin-top: 10px;
+    }
 }
