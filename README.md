@@ -4,8 +4,6 @@
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 ![Docker](https://img.shields.io/badge/docker-ready-brightgreen.svg)
 
-SideQuests provides an intuitive and mobile friendly web-interface for managing tasks and objectives.
-
 <img src="image.png" width="900">
 
 ## 🐳 Setup
@@ -32,6 +30,8 @@ services:
 ```
 
 ## ✨ Core Functionality
+
+SideQuests provides an intuitive and mobile friendly web-interface for managing tasks and objectives.
 
 **Quests**
    - Quests contain individual Objectives. Leaving the title blank automatically assigns today's date as the title.
