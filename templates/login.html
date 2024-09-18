@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}Login - SideQuests{% endblock %}
+
+{% block content %}
+<div class="login-container">
+    <h2>SideQuests</h2>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <ul class="flashes">
+        {% for category, message in messages %}
+        <li class="{{ category }}">{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    {% endwith %}
+    <form method="POST" class="login-form">
+        <input type="text" name="username" placeholder="Username" required autofocus>
+        <input type="password" name="password" placeholder="Password" required>
+        <button type="submit">Login</button>
+    </form>
+</div>
+{% endblock %}

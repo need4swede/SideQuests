@@ -9,6 +9,14 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 
+<header>
+    {% if session.get('logged_in') %}
+    <nav class="navbar">
+        <a href="{{ url_for('logout') }}">Logout</a>
+    </nav>
+    {% endif %}
+</header>
+
 <body>
 
     {% block content %}

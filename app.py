@@ -1,6 +1,7 @@
-from flask import Flask, render_template, request, redirect, url_for, jsonify
-from models import db, Objective, Quest
+from flask import Flask, render_template, request, redirect, url_for, jsonify, session, flash
+from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+from functools import wraps
 import os
 from datetime import datetime
 
@@ -10,37 +11,100 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///sidequests.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+# Set the secret key for session management
+app.secret_key = os.environ.get('SECRET_KEY', 'your_default_secret_key')
+
 # Initialize the database with the app
-db.init_app(app)
+db = SQLAlchemy(app)
 migrate = Migrate(app, db)
+
+# Define the Quest model
+class Quest(db.Model):
+    """
+    Model representing a quest.
+    """
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    order = db.Column(db.Integer, default=0)  # Order field
+
+    # Relationship to objectives
+    objectives = db.relationship('Objective', backref='quest', lazy=True)
+
+# Define the Objective model
+class Objective(db.Model):
+    """
+    Model representing an objective within a quest.
+    """
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), nullable=False)
+    completed = db.Column(db.Boolean, default=False)
+    order = db.Column(db.Integer, default=0)  # Order field
+    list_id = db.Column(db.Integer, db.ForeignKey('quest.id'), nullable=False)
 
 # Ensure tables are created
 with app.app_context():
     db.create_all()
 
+# Decorator for routes that require login
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'logged_in' not in session:
+            return redirect(url_for('login', next=request.url))
+        return f(*args, **kwargs)
+    return decorated_function
+
+# Route for login
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    """
+    Handles user login by checking the provided credentials against environment variables.
+    """
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+
+        # Get admin credentials from environment variables
+        admin_username = os.environ.get('ADMIN_USERNAME')
+        admin_password = os.environ.get('ADMIN_PASSWORD')
+
+        if username == admin_username and password == admin_password:
+            session['logged_in'] = True
+            flash('You were successfully logged in.', 'success')
+            next_url = request.args.get('next')
+            return redirect(next_url or url_for('index'))
+        else:
+            flash('Invalid username or password.', 'danger')
+    return render_template('login.html')
+
+# Route for logout
+@app.route('/logout')
+def logout():
+    """
+    Logs the user out by clearing the session.
+    """
+    session.clear()
+    flash('You have been logged out.', 'info')
+    return redirect(url_for('login'))
+
+# Home page displaying all quests
 @app.route('/', methods=['GET'])
+@login_required
 def index():
     """
     Home page that displays all the quests, ordered by the 'order' field.
-
-    Returns:
-        Rendered template for the quests index page with all quests.
     """
     # Query all quests from the database, ordered by 'order'
     quests = Quest.query.order_by(Quest.order).all()
     # Render the template with the quests
     return render_template('list_index.html', lists=quests)  # 'lists' variable is used in the template
 
+# View a specific quest and its objectives
 @app.route('/list/<int:list_id>', methods=['GET'])
+@login_required
 def view_list(list_id):
     """
     Displays all objectives within a specific quest, ordered by 'order'.
-
-    Args:
-        list_id (int): The ID of the quest to view.
-
-    Returns:
-        Rendered template for the objectives list page with all objectives in the specified quest.
     """
     # Get the quest by ID or return 404 if not found
     quest = Quest.query.get_or_404(list_id)
@@ -49,23 +113,19 @@ def view_list(list_id):
     # Render the template with the objectives and the quest
     return render_template('task_list.html', tasks=objectives, list=quest)  # 'tasks' and 'list' variables are used in the template
 
+# Add a new quest
 @app.route('/add_list', methods=['POST'])
+@login_required
 def add_list():
     """
     Adds a new quest to the database.
-
-    If the quest name is not provided, defaults to today's date in the format 'Tuesday, 9/17/24'.
-
-    Returns:
-        JSON response with the new quest's ID and name if successful.
-        JSON error message with status code 400 if the quest name is invalid.
     """
     # Get the quest name from the form data
     name = request.form.get('name')
     if not name or name.strip() == '':
         # Generate today's date in the specified format
         today = datetime.now()
-        # Format the date (Cross-platform compatibility)
+        # Format the date
         name = today.strftime('%A, %m/%d/%y').lstrip('0').replace('/0', '/')
     if name:
         # Determine the next order value
@@ -80,17 +140,12 @@ def add_list():
         # Return error if name is invalid
         return jsonify({'error': 'Quest name is required.'}), 400
 
+# Delete a quest and its objectives
 @app.route('/delete_list/<int:list_id>', methods=['DELETE'])
+@login_required
 def delete_list(list_id):
     """
     Deletes a quest and all its associated objectives from the database.
-
-    Args:
-        list_id (int): The ID of the quest to delete.
-
-    Returns:
-        JSON response indicating success if the deletion was successful.
-        JSON error message with status code 404 if the quest is not found.
     """
     # Get the quest by ID or return 404 if not found
     quest = Quest.query.get_or_404(list_id)
@@ -106,17 +161,12 @@ def delete_list(list_id):
         # Return error if quest not found
         return jsonify({'error': 'Quest not found.'}), 404
 
+# Add a new objective to a quest
 @app.route('/list/<int:list_id>/add_task', methods=['POST'])
+@login_required
 def add_task(list_id):
     """
     Adds a new objective to a specified quest.
-
-    Args:
-        list_id (int): The ID of the quest to which the objective will be added.
-
-    Returns:
-        JSON response with the new objective's data if successful.
-        JSON error message with status code 400 if the objective title is invalid.
     """
     # Get the objective title from the form data
     title = request.form.get('title')
@@ -137,18 +187,12 @@ def add_task(list_id):
         # Return error if title is invalid
         return jsonify({'error': 'Objective title is required.'}), 400
 
+# Toggle the completion status of an objective
 @app.route('/list/<int:list_id>/complete/<int:task_id>', methods=['POST'])
+@login_required
 def complete_task(list_id, task_id):
     """
     Toggles the completion status of an objective.
-
-    Args:
-        list_id (int): The ID of the quest containing the objective.
-        task_id (int): The ID of the objective to toggle.
-
-    Returns:
-        JSON response indicating success and the new completion status if successful.
-        JSON error message with status code 404 if the objective is not found or does not belong to the quest.
     """
     # Get the objective by ID or return 404 if not found
     objective = Objective.query.get_or_404(task_id)
@@ -162,18 +206,12 @@ def complete_task(list_id, task_id):
         # Return error if objective not found or does not belong to the quest
         return jsonify({'error': 'Objective not found or does not belong to this quest.'}), 404
 
+# Delete an objective from a quest
 @app.route('/list/<int:list_id>/delete/<int:task_id>', methods=['DELETE'])
+@login_required
 def delete_task(list_id, task_id):
     """
     Deletes an objective from the database.
-
-    Args:
-        list_id (int): The ID of the quest containing the objective.
-        task_id (int): The ID of the objective to delete.
-
-    Returns:
-        JSON response indicating success if the deletion was successful.
-        JSON error message with status code 404 if the objective is not found or does not belong to the quest.
     """
     # Get the objective by ID or return 404 if not found
     objective = Objective.query.get_or_404(task_id)
@@ -187,17 +225,12 @@ def delete_task(list_id, task_id):
         # Return error if objective not found or does not belong to the quest
         return jsonify({'error': 'Objective not found or does not belong to this quest.'}), 404
 
+# Update the name of a quest
 @app.route('/update_list/<int:list_id>', methods=['PUT'])
+@login_required
 def update_list(list_id):
     """
     Updates the name of a quest.
-
-    Args:
-        list_id (int): The ID of the quest to update.
-
-    Returns:
-        JSON response indicating success if the update was successful.
-        JSON error message with status code 400 if the new name is invalid.
     """
     # Get the new name from the JSON payload
     data = request.get_json()
@@ -214,18 +247,12 @@ def update_list(list_id):
     # Return success response
     return jsonify({'success': True})
 
+# Update the title of an objective
 @app.route('/update_task/<int:list_id>/<int:task_id>', methods=['PUT'])
+@login_required
 def update_task(list_id, task_id):
     """
     Updates the title of an objective.
-
-    Args:
-        list_id (int): The ID of the quest containing the objective.
-        task_id (int): The ID of the objective to update.
-
-    Returns:
-        JSON response indicating success if the update was successful.
-        JSON error message with status code 400 if the new title is invalid or the objective does not belong to the quest.
     """
     # Get the new title from the JSON payload
     data = request.get_json()
@@ -246,15 +273,12 @@ def update_task(list_id, task_id):
     # Return success response
     return jsonify({'success': True})
 
+# Update the order of quests after drag-and-drop
 @app.route('/update_quest_order', methods=['POST'])
+@login_required
 def update_quest_order():
     """
     Updates the order of quests based on user drag-and-drop actions.
-
-    Expects a JSON payload with 'ordered_ids', a list of quest IDs in their new order.
-
-    Returns:
-        JSON response indicating success or failure.
     """
     data = request.get_json()
     ordered_ids = data.get('ordered_ids', [])
@@ -270,18 +294,12 @@ def update_quest_order():
         db.session.rollback()
         return jsonify({'error': str(e)}), 400
 
+# Update the order of objectives within a quest after drag-and-drop
 @app.route('/update_objective_order/<int:list_id>', methods=['POST'])
+@login_required
 def update_objective_order(list_id):
     """
     Updates the order of objectives within a quest based on user drag-and-drop actions.
-
-    Args:
-        list_id (int): The ID of the quest containing the objectives.
-
-    Expects a JSON payload with 'ordered_ids', a list of objective IDs in their new order.
-
-    Returns:
-        JSON response indicating success or failure.
     """
     data = request.get_json()
     ordered_ids = data.get('ordered_ids', [])
@@ -297,6 +315,7 @@ def update_objective_order(list_id):
         db.session.rollback()
         return jsonify({'error': str(e)}), 400
 
+# Run the application
 if __name__ == '__main__':
     # Get the host and port from environment variables, with defaults
     host = os.environ.get('FLASK_RUN_HOST', '0.0.0.0')

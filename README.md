@@ -13,14 +13,17 @@ SideQuests provides an intuitive and mobile friendly web-interface for managing 
 ### Docker Run
 
 ```bash
-docker run -p 8080:8080 \
-  -v ./instance:/app/instance \
-  need4swede/sidequests
+docker run -d \
+  -p 8080:8080 \
+  -e PORT=8080 \
+  -e ADMIN_USERNAME=your_admin_username \
+  -e ADMIN_PASSWORD=your_admin_password \
+  -e SECRET_KEY=your_secret_key \
+  need4swede/sidequests:latest
 ```
 
 ### Docker Compose
 ```yml
-
 services:
   SideQuests:
     image: need4swede/sidequests:latest
@@ -29,6 +32,12 @@ services:
       - "8080:8080"
     volumes:
       - ./instance:/app/instance
+    environment:
+      - PORT=8080
+      - ADMIN_USERNAME=your_admin_username
+      - ADMIN_PASSWORD=your_admin_password
+      - SECRET_KEY=your_secret_key
+
 ```
 
 ## ✨ Core Functionality
