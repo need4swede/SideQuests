@@ -300,5 +300,5 @@ def update_objective_order(list_id):
 if __name__ == '__main__':
     # Get the host and port from environment variables, with defaults
     host = os.environ.get('FLASK_RUN_HOST', '0.0.0.0')
-    port = int(os.environ.get('PORT', 8000))
+    port = int(os.environ.get('PORT', 8080))
     app.run(debug=True, host=host, port=port)
