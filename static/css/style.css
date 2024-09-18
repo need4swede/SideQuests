@@ -39,6 +39,13 @@ a:hover {
     color: inherit;
 }
 
+/* Reset margins and padding for all elements */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
 /*------------------------------------------------------------
     4. Header Styles
 ------------------------------------------------------------*/
@@ -46,27 +53,39 @@ header {
     display: flex;
     align-items: center;
     justify-content: center;
-    /* Center the header text */
     background-color: var(--header-background);
     padding: 15px;
     position: sticky;
     top: 0;
+    z-index: 5;
+    /* Ensure header is below back-button */
 }
 
 header h1 {
     font-size: 28px;
-    /* Increased font size */
     margin: 0;
 }
 
 .back-button {
     position: absolute;
     left: 15px;
+    top: 15px;
     background: none;
     border: none;
     font-size: 24px;
     cursor: pointer;
     color: var(--text-color);
+    z-index: 10;
+    /* Ensure it's above other elements */
+}
+
+/* Adjust back-button for mobile */
+@media (max-width: 600px) {
+    .back-button {
+        font-size: 20px;
+        top: 10px;
+        left: 10px;
+    }
 }
 
 /*------------------------------------------------------------
@@ -83,9 +102,7 @@ header h1 {
 .add-task-form input {
     flex: 1;
     padding: 12px;
-    /* Increased padding */
     font-size: 18px;
-    /* Increased font size */
     background-color: var(--input-background);
     border: 1px solid var(--input-border);
     border-radius: 5px;
@@ -95,9 +112,7 @@ header h1 {
 .add-list-form button,
 .add-task-form button {
     padding: 12px 24px;
-    /* Increased padding */
     font-size: 18px;
-    /* Increased font size */
     background-color: var(--button-background);
     color: var(--button-text-color);
     border: none;
@@ -124,14 +139,13 @@ header h1 {
     border: 1px solid var(--card-border);
     border-radius: 10px;
     padding: 20px;
-    /* Increased padding */
     display: flex;
     align-items: center;
+    cursor: pointer;
 }
 
 .list-card:hover {
     background-color: rgba(255, 255, 255, 0.05);
-    /* Subtle hover effect */
 }
 
 .list-header {
@@ -142,7 +156,6 @@ header h1 {
 
 .list-name {
     font-size: 24px;
-    /* Increased font size */
     font-weight: 500;
 }
 
@@ -160,7 +173,6 @@ header h1 {
 
 .task-card:hover {
     background-color: rgba(255, 255, 255, 0.05);
-    /* Subtle hover effect */
 }
 
 .task-content {
@@ -169,7 +181,8 @@ header h1 {
     gap: 15px;
     cursor: pointer;
     flex-grow: 1;
-    /* Ensure it fills available space */
+    pointer-events: auto;
+    /* Ensure touch events are allowed */
 }
 
 .task-buttons {
@@ -183,7 +196,6 @@ header h1 {
 
 .task-title {
     font-size: 22px;
-    /* Increased font size */
     flex: 1;
 }
 
@@ -203,20 +215,19 @@ header h1 {
     border: none;
     font-size: 24px;
     cursor: pointer;
+    pointer-events: auto;
+    /* Ensure touch events are allowed */
 }
 
 .edit-list-button,
 .edit-task-button {
     color: #ffc107;
-    /* Amber color */
     margin-right: 10px;
-    /* Space between edit and delete buttons */
 }
 
 .delete-list-button,
 .delete-task-button {
     color: #dc3545;
-    /* Red color */
 }
 
 /*------------------------------------------------------------
@@ -243,7 +254,7 @@ header h1 {
 /*------------------------------------------------------------
     11. Miscellaneous Styles
 ------------------------------------------------------------*/
-/* Any additional styles can be added here */
+/* No additional styles needed */
 
 /*------------------------------------------------------------
     12. Modal Styles
@@ -251,20 +262,18 @@ header h1 {
 /* Modal container */
 .modal {
     display: none;
-    /* Hidden by default */
     position: fixed;
     z-index: 1000;
-    /* Sit on top */
     left: 0;
     top: 0;
     width: 100%;
     height: 100%;
     overflow: auto;
-    /* Enable scroll if needed */
     background-color: rgba(0, 0, 0, 0.6);
-    /* Black with opacity */
     align-items: center;
     justify-content: center;
+    pointer-events: none;
+    /* Prevent blocking interactions when hidden */
 }
 
 /* Modal Content */
@@ -278,6 +287,8 @@ header h1 {
     max-width: 400px;
     position: relative;
     animation: fadeIn 0.3s;
+    pointer-events: auto;
+    /* Allow interactions inside modal */
 }
 
 /* Close Button */
