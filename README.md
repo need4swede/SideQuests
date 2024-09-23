@@ -23,7 +23,8 @@ docker run -d \
 ```
 
 ### Docker Compose
-```yml
+
+```yaml
 services:
   SideQuests:
     image: need4swede/sidequests:latest
