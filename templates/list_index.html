@@ -10,6 +10,16 @@
     <button type="submit">Add</button>
 </form>
 
+<!-- Sort Buttons for Quests -->
+<div class="sort-buttons">
+    <button id="sort-name-button" data-sort-field="name" data-sort-order="asc">
+        Sort by Name <span class="sort-icon">&#9650;</span>
+    </button>
+    <button id="sort-creation-button" data-sort-field="creation" data-sort-order="asc">
+        Sort by Creation <span class="sort-icon">&#9650;</span>
+    </button>
+</div>
+
 <div id="quests-container" class="lists-container">
     {% for quest in lists %}
     <div class="list-card" data-list-id="{{ quest.id }}">
@@ -26,7 +36,6 @@
         <button class="edit-list-button">✎</button>
         <button class="delete-list-button">&times;</button>
     </div>
-
     {% endfor %}
 </div>
 {% endblock %}

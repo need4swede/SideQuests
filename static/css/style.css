@@ -452,3 +452,89 @@ header h1 {
     background-color: #17a2b8;
     color: white;
 }
+
+
+/*------------------------------------------------------------
+    13. Sorting Buttons
+------------------------------------------------------------*/
+
+/* Container for sorting buttons */
+.sort-buttons {
+    margin: 20px 0;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+/* Styling for sorting buttons */
+.sort-buttons button {
+    padding: 10px 20px;
+    background-color: #2c2c2c;
+    /* Dark background for dark mode */
+    color: #ffffff;
+    /* White text for contrast */
+    border: 1px solid #444444;
+    /* Subtle border */
+    border-radius: 8px;
+    /* Rounded corners for a modern feel */
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    transition: background-color 0.3s, border-color 0.3s, transform 0.2s;
+    position: relative;
+    min-width: 150px;
+    /* Ensure buttons have a consistent width */
+}
+
+/* Hover effect for sorting buttons */
+.sort-buttons button:hover {
+    background-color: #3a3a3a;
+    /* Slightly lighter on hover */
+    border-color: #555555;
+    /* Darker border on hover */
+    transform: translateY(-2px);
+    /* Subtle lift effect */
+}
+
+/* Active state for sorting buttons */
+.sort-buttons button.active {
+    background-color: #4a90e2;
+    /* Accent color for active state */
+    border-color: #4a90e2;
+    color: #ffffff;
+    cursor: default;
+    transform: none;
+}
+
+/* Sort icon styling */
+.sort-buttons button .sort-icon {
+    margin-left: 8px;
+    font-size: 12px;
+    transition: transform 0.3s;
+}
+
+/* Rotate sort icon for descending order */
+.sort-buttons button.desc .sort-icon {
+    transform: rotate(180deg);
+}
+
+/* Focus outline for accessibility */
+.sort-buttons button:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.6);
+    /* Soft blue glow */
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+    .sort-buttons {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .sort-buttons button {
+        width: 100%;
+        justify-content: center;
+    }
+}

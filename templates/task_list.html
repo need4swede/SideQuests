@@ -12,6 +12,16 @@
     <button type="submit">Add</button>
 </form>
 
+<!-- Sort Buttons for Objectives -->
+<div class="sort-buttons">
+    <button id="sort-title-button" data-sort-field="title" data-sort-order="asc">
+        Sort by Title <span class="sort-icon">&#9650;</span>
+    </button>
+    <button id="sort-creation-task-button" data-sort-field="creation" data-sort-order="asc">
+        Sort by Creation <span class="sort-icon">&#9650;</span>
+    </button>
+</div>
+
 <div id="objectives-container" class="tasks-container" data-list-id="{{ list.id }}">
     {% for objective in tasks %}
     <div class="task-card {% if objective.completed %}completed{% endif %}" data-task-id="{{ objective.id }}">
@@ -35,7 +45,6 @@
             <button class="delete-task-button">&times;</button>
         </div>
     </div>
-
     {% endfor %}
 </div>
 {% endblock %}
