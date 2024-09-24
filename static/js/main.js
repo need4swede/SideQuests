@@ -1,6 +1,6 @@
 /**
  * main.js - JavaScript functions for SideQuests app
- * Includes drag-and-drop functionality using SortableJS
+ * Includes enhanced drag-and-drop functionality using SortableJS with dedicated drag handles for better mobile support.
  */
 
 // Initialize global variables for the edit modal
@@ -203,6 +203,13 @@ function addTaskToDOM(task) {
         taskCard.classList.add('task-card');
         taskCard.setAttribute('data-task-id', task.id);
 
+        // Create Drag Handle
+        const dragHandle = document.createElement('div');
+        dragHandle.classList.add('drag-handle');
+        dragHandle.setAttribute('aria-label', 'Drag Handle');
+        dragHandle.setAttribute('title', 'Drag to reorder');
+        dragHandle.innerHTML = '&#9776;'; // Unicode for the hamburger menu icon
+
         const taskContent = document.createElement('div');
         taskContent.classList.add('task-content');
         taskContent.style.flexGrow = '1';
@@ -223,15 +230,16 @@ function addTaskToDOM(task) {
 
         const editButton = document.createElement('button');
         editButton.classList.add('edit-task-button');
-        editButton.innerHTML = '&#9998;';
+        editButton.innerHTML = '&#9998;'; // Pencil icon
 
         const deleteButton = document.createElement('button');
         deleteButton.classList.add('delete-task-button');
-        deleteButton.innerHTML = '&times;';
+        deleteButton.innerHTML = '&times;'; // Times (X) icon
 
         taskButtons.appendChild(editButton);
         taskButtons.appendChild(deleteButton);
 
+        taskCard.appendChild(dragHandle);
         taskCard.appendChild(taskContent);
         taskCard.appendChild(taskButtons);
 
@@ -262,6 +270,13 @@ function addListToDOM(list) {
         listCard.classList.add('list-card');
         listCard.setAttribute('data-list-id', list.id);
 
+        // Create Drag Handle
+        const dragHandle = document.createElement('div');
+        dragHandle.classList.add('drag-handle');
+        dragHandle.setAttribute('aria-label', 'Drag Handle');
+        dragHandle.setAttribute('title', 'Drag to reorder');
+        dragHandle.innerHTML = '&#9776;'; // Unicode for the hamburger menu icon
+
         const listLink = document.createElement('a');
         listLink.href = `/list/${list.id}`;
         listLink.style.flexGrow = '1';
@@ -278,12 +293,13 @@ function addListToDOM(list) {
 
         const editButton = document.createElement('button');
         editButton.classList.add('edit-list-button');
-        editButton.innerHTML = '&#9998;';
+        editButton.innerHTML = '&#9998;'; // Pencil icon
 
         const deleteButton = document.createElement('button');
         deleteButton.classList.add('delete-list-button');
-        deleteButton.innerHTML = '&times;';
+        deleteButton.innerHTML = '&times;'; // Times (X) icon
 
+        listCard.appendChild(dragHandle);
         listCard.appendChild(listLink);
         listCard.appendChild(editButton);
         listCard.appendChild(deleteButton);
@@ -357,6 +373,45 @@ function updateObjectiveOrder() {
  */
 function handleBackButton() {
     window.location.href = '/'; // Assuming the root URL is the index page
+}
+
+/**
+ * Function to initialize SortableJS with drag handles
+ */
+function initializeSortable() {
+    // Initialize SortableJS for Quests (Lists)
+    const questsContainer = document.getElementById('quests-container');
+    if (questsContainer) {
+        Sortable.create(questsContainer, {
+            animation: 150,
+            handle: '.drag-handle', // Restrict drag to the drag handle
+            ghostClass: 'sortable-ghost', // Class name for the drop placeholder
+            onEnd: function (evt) {
+                // Update quest order when drag-and-drop action ends
+                updateQuestOrder();
+            },
+            // Optional: Enhance mobile experience
+            delay: 150, // Delay in ms before drag starts
+            touchStartThreshold: 10, // Threshold for touch movements
+        });
+    }
+
+    // Initialize SortableJS for Objectives (Tasks)
+    const objectivesContainer = document.getElementById('objectives-container');
+    if (objectivesContainer) {
+        Sortable.create(objectivesContainer, {
+            animation: 150,
+            handle: '.drag-handle', // Restrict drag to the drag handle
+            ghostClass: 'sortable-ghost',
+            onEnd: function (evt) {
+                // Update objective order when drag-and-drop action ends
+                updateObjectiveOrder();
+            },
+            // Optional: Enhance mobile experience
+            delay: 150,
+            touchStartThreshold: 10,
+        });
+    }
 }
 
 /**
@@ -466,61 +521,58 @@ function initializeEventListeners() {
         });
     }
 
-    // Initialize SortableJS for Quests (Lists)
-    const questsContainer = document.getElementById('quests-container');
-    if (questsContainer) {
-        Sortable.create(questsContainer, {
-            animation: 150,
-            handle: '.list-card', // Allow dragging by clicking on the list card
-            ghostClass: 'sortable-ghost', // Class name for the drop placeholder
-            onEnd: function (evt) {
-                // Update quest order when drag-and-drop action ends
-                updateQuestOrder();
-            }
-        });
-    }
-
-    // Initialize SortableJS for Objectives (Tasks)
-    const objectivesContainer = document.getElementById('objectives-container');
-    if (objectivesContainer) {
-        Sortable.create(objectivesContainer, {
-            animation: 150,
-            handle: '.task-card', // Allow dragging by clicking on the task card
-            ghostClass: 'sortable-ghost',
-            onEnd: function (evt) {
-                // Update objective order when drag-and-drop action ends
-                updateObjectiveOrder();
-            }
-        });
-    }
+    // Initialize SortableJS with drag handles
+    initializeSortable();
 
     // Add event listeners for existing elements
     document.querySelectorAll('.task-card').forEach(card => {
         const listId = card.closest('.tasks-container').dataset.listId;
         const taskId = card.dataset.taskId;
 
-        card.querySelector('.task-content').addEventListener('click', () => toggleComplete(listId, taskId));
-        card.querySelector('.edit-task-button').addEventListener('click', (event) => {
-            event.stopPropagation();
-            showEditModal('task', taskId, card.querySelector('.task-title').textContent, listId);
-        });
-        card.querySelector('.delete-task-button').addEventListener('click', (event) => {
-            event.stopPropagation();
-            deleteTask(listId, taskId);
-        });
+        const taskContent = card.querySelector('.task-content');
+        const editButton = card.querySelector('.edit-task-button');
+        const deleteButton = card.querySelector('.delete-task-button');
+
+        if (taskContent) {
+            taskContent.addEventListener('click', () => toggleComplete(listId, taskId));
+        }
+
+        if (editButton) {
+            editButton.addEventListener('click', (event) => {
+                event.stopPropagation();
+                const taskTitle = card.querySelector('.task-title').textContent;
+                showEditModal('task', taskId, taskTitle, listId);
+            });
+        }
+
+        if (deleteButton) {
+            deleteButton.addEventListener('click', (event) => {
+                event.stopPropagation();
+                deleteTask(listId, taskId);
+            });
+        }
     });
 
     document.querySelectorAll('.list-card').forEach(card => {
         const listId = card.dataset.listId;
 
-        card.querySelector('.edit-list-button').addEventListener('click', (event) => {
-            event.stopPropagation();
-            showEditModal('list', listId, card.querySelector('.list-name').textContent);
-        });
-        card.querySelector('.delete-list-button').addEventListener('click', (event) => {
-            event.stopPropagation();
-            deleteList(listId);
-        });
+        const editButton = card.querySelector('.edit-list-button');
+        const deleteButton = card.querySelector('.delete-list-button');
+
+        if (editButton) {
+            editButton.addEventListener('click', (event) => {
+                event.stopPropagation();
+                const listName = card.querySelector('.list-name').textContent;
+                showEditModal('list', listId, listName);
+            });
+        }
+
+        if (deleteButton) {
+            deleteButton.addEventListener('click', (event) => {
+                event.stopPropagation();
+                deleteList(listId);
+            });
+        }
     });
 }
 

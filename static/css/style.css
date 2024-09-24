@@ -219,7 +219,41 @@ header h1 {
 }
 
 /*------------------------------------------------------------
-    10. Mobile Responsiveness
+    10. Drag Handle Styles
+------------------------------------------------------------*/
+/* Style for the drag handle */
+.drag-handle {
+    cursor: grab;
+    /* Indicates draggable area */
+    padding: 8px;
+    margin-right: 8px;
+    font-size: 24px;
+    color: #888;
+    user-select: none;
+    /* Prevents text selection */
+}
+
+.drag-handle:active {
+    cursor: grabbing;
+    /* Changes cursor when active */
+}
+
+/* Ensure the card displays flexibly with aligned items */
+.list-card,
+.task-card {
+    display: flex;
+    align-items: center;
+}
+
+/* Optional: Add spacing between drag handle and content */
+.list-card .list-header,
+.task-card .task-content {
+    display: flex;
+    align-items: center;
+}
+
+/*------------------------------------------------------------
+    11. Mobile Responsiveness
 ------------------------------------------------------------*/
 @media (max-width: 600px) {
     header h1 {
@@ -237,12 +271,23 @@ header h1 {
     .add-task-form button {
         font-size: 16px;
     }
-}
 
-/*------------------------------------------------------------
-    11. Miscellaneous Styles
-------------------------------------------------------------*/
-/* No additional styles needed */
+    /* Adjust drag handle size for smaller screens */
+    .drag-handle {
+        font-size: 20px;
+        padding: 6px;
+        margin-right: 6px;
+    }
+
+    /* Adjust button sizes */
+    .edit-list-button,
+    .edit-task-button,
+    .delete-list-button,
+    .delete-task-button {
+        font-size: 20px;
+        padding: 6px;
+    }
+}
 
 /*------------------------------------------------------------
     12. Modal Styles

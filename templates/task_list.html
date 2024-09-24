@@ -15,6 +15,11 @@
 <div id="objectives-container" class="tasks-container" data-list-id="{{ list.id }}">
     {% for objective in tasks %}
     <div class="task-card {% if objective.completed %}completed{% endif %}" data-task-id="{{ objective.id }}">
+        <!-- Drag Handle -->
+        <div class="drag-handle" aria-label="Drag Handle" title="Drag to reorder">
+            &#9776;
+        </div>
+
         <div class="task-content" style="flex-grow: 1;">
             <div class="checkbox">
                 {% if objective.completed %}
@@ -30,6 +35,7 @@
             <button class="delete-task-button">&times;</button>
         </div>
     </div>
+
     {% endfor %}
 </div>
 {% endblock %}

@@ -13,6 +13,11 @@
 <div id="quests-container" class="lists-container">
     {% for quest in lists %}
     <div class="list-card" data-list-id="{{ quest.id }}">
+        <!-- Drag Handle -->
+        <div class="drag-handle" aria-label="Drag Handle" title="Drag to reorder">
+            &#9776;
+        </div>
+
         <a href="{{ url_for('view_list', list_id=quest.id) }}" style="flex-grow: 1;">
             <div class="list-header">
                 <span class="list-name">{{ quest.name }}</span>
@@ -21,6 +26,7 @@
         <button class="edit-list-button">✎</button>
         <button class="delete-list-button">&times;</button>
     </div>
+
     {% endfor %}
 </div>
 {% endblock %}
