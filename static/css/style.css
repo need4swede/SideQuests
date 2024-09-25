@@ -133,15 +133,6 @@ header h1 {
     padding-top: 20px;
 }
 
-#completed-objectives::before {
-    content: 'Completed Objectives';
-    display: block;
-    font-size: 18px;
-    font-weight: 500;
-    margin-bottom: 15px;
-    color: var(--text-color);
-}
-
 /*------------------------------------------------------------
     7. List Card Styles
 ------------------------------------------------------------*/

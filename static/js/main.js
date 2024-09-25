@@ -21,6 +21,34 @@ const LOCAL_STORAGE_KEYS = {
     tasks: 'tasksSortPreference'
 };
 
+const GROUP_OBJECTIVES_KEY = 'groupObjectivesPreference';
+let groupObjectives = false;
+
+
+/**
+ * Function to check if tasks are still grouped correctly
+ * @returns {boolean} - Returns true if grouping is valid, false otherwise
+ */
+function checkGroupingValidity() {
+    const tasksContainer = document.getElementById('objectives-container');
+    if (!tasksContainer) return true; // If container not found, assume valid.
+
+    const tasks = Array.from(tasksContainer.querySelectorAll('.task-card'));
+
+    let seenCompleted = false;
+    for (let task of tasks) {
+        if (task.classList.contains('completed')) {
+            seenCompleted = true;
+        } else {
+            if (seenCompleted) {
+                // Found an incomplete task after a completed task, grouping violated
+                return false;
+            }
+        }
+    }
+    return true; // Grouping is valid
+}
+
 /**
  * Function to show the edit modal
  * @param {string} type - Type of item ('list' or 'task')
@@ -92,6 +120,13 @@ function toggleComplete(listId, taskId) {
                         checkbox.innerHTML = data.completed ? '&#10003;' : '&#9675;';
                     }
                 }
+                // Re-sort tasks after completion status changes
+                const savedTasksSort = loadSortPreference('tasks');
+                if (savedTasksSort) {
+                    sortTasks(savedTasksSort.type, savedTasksSort.order);
+                } else {
+                    sortTasks(null, null);
+                }
             } else {
                 alert(data.error);
             }
@@ -117,6 +152,13 @@ function deleteTask(listId, taskId) {
                     const taskCard = document.querySelector(`.task-card[data-task-id='${taskId}']`);
                     if (taskCard) {
                         taskCard.remove();
+                    }
+                    // Re-sort tasks after deleting a task
+                    const savedTasksSort = loadSortPreference('tasks');
+                    if (savedTasksSort) {
+                        sortTasks(savedTasksSort.type, savedTasksSort.order);
+                    } else {
+                        sortTasks(null, null);
                     }
                 } else {
                     alert(data.error);
@@ -210,6 +252,13 @@ function updateTaskTitle(listId, taskId, newTitle) {
                         taskTitleElement.textContent = newTitle;
                     }
                 }
+                // Re-sort tasks after updating task title
+                const savedTasksSort = loadSortPreference('tasks');
+                if (savedTasksSort) {
+                    sortTasks(savedTasksSort.type, savedTasksSort.order);
+                } else {
+                    sortTasks(null, null);
+                }
             } else {
                 alert(data.error);
             }
@@ -230,6 +279,9 @@ function addTaskToDOM(task) {
 
         const taskCard = document.createElement('div');
         taskCard.classList.add('task-card');
+        if (task.completed) {
+            taskCard.classList.add('completed');
+        }
         taskCard.setAttribute('data-task-id', task.id);
 
         // Create Drag Handle
@@ -274,6 +326,14 @@ function addTaskToDOM(task) {
 
         // Append the new task to the container
         tasksContainer.appendChild(taskCard);
+
+        // Re-sort tasks after adding new task
+        const savedTasksSort = loadSortPreference('tasks');
+        if (savedTasksSort) {
+            sortTasks(savedTasksSort.type, savedTasksSort.order);
+        } else {
+            sortTasks(null, null);
+        }
 
         // Add event listeners
         if (taskContent) {
@@ -443,15 +503,14 @@ function initializeSortable() {
     if (questsContainer) {
         Sortable.create(questsContainer, {
             animation: 150,
-            handle: '.drag-handle', // Restrict drag to the drag handle
-            ghostClass: 'sortable-ghost', // Class name for the drop placeholder
+            handle: '.drag-handle',
+            ghostClass: 'sortable-ghost',
             onEnd: function (evt) {
                 // Update quest order when drag-and-drop action ends
                 updateQuestOrder();
             },
-            // Optional: Enhance mobile experience
-            delay: 150, // Delay in ms before drag starts
-            touchStartThreshold: 10, // Threshold for touch movements
+            delay: 150,
+            touchStartThreshold: 10,
         });
     }
 
@@ -460,13 +519,34 @@ function initializeSortable() {
     if (objectivesContainer) {
         Sortable.create(objectivesContainer, {
             animation: 150,
-            handle: '.drag-handle', // Restrict drag to the drag handle
+            handle: '.drag-handle',
             ghostClass: 'sortable-ghost',
             onEnd: function (evt) {
                 // Update objective order when drag-and-drop action ends
                 updateObjectiveOrder();
+
+                // Check if grouping is still valid
+                if (groupObjectives) {
+                    const groupingValid = checkGroupingValidity();
+                    if (!groupingValid) {
+                        // Grouping violated, turn off grouping
+                        groupObjectives = false;
+                        const groupObjectivesToggle = document.getElementById('group-objectives-toggle');
+                        if (groupObjectivesToggle) {
+                            groupObjectivesToggle.checked = false;
+                        }
+                        localStorage.setItem(GROUP_OBJECTIVES_KEY, groupObjectives);
+
+                        // Re-sort tasks without grouping
+                        const savedTasksSort = loadSortPreference('tasks');
+                        if (savedTasksSort) {
+                            sortTasks(savedTasksSort.type, savedTasksSort.order);
+                        } else {
+                            sortTasks(null, null); // Use default sorting
+                        }
+                    }
+                }
             },
-            // Optional: Enhance mobile experience
             delay: 150,
             touchStartThreshold: 10,
         });
@@ -484,26 +564,42 @@ function sortQuests(field, order) {
 
     const quests = Array.from(questsContainer.querySelectorAll('.list-card'));
 
-    let sortedQuests = quests.sort((a, b) => {
-        let valueA, valueB;
+    // If no field specified, default to 'creation' ascending
+    if (!field) {
+        field = 'creation';
+        order = 'asc';
+    }
+
+    // Function to get sort value
+    function getSortValue(quest) {
+        let value;
         if (field === 'name') {
-            valueA = a.querySelector('.list-name').textContent.toLowerCase();
-            valueB = b.querySelector('.list-name').textContent.toLowerCase();
+            value = quest.querySelector('.list-name').textContent.toLowerCase();
         } else if (field === 'creation') {
-            valueA = parseInt(a.getAttribute('data-list-id'));
-            valueB = parseInt(b.getAttribute('data-list-id'));
+            value = parseInt(quest.getAttribute('data-list-id'));
         }
+        return value;
+    }
+
+    // Sort quests
+    quests.sort((a, b) => {
+        const valueA = getSortValue(a);
+        const valueB = getSortValue(b);
         if (valueA < valueB) return order === 'asc' ? -1 : 1;
         if (valueA > valueB) return order === 'asc' ? 1 : -1;
         return 0;
     });
 
     // Append sorted quests to the container
-    sortedQuests.forEach(quest => questsContainer.appendChild(quest));
+    quests.forEach(quest => questsContainer.appendChild(quest));
+
+    // Save sorting preference
+    saveSortPreference('quests', field, order);
+    updateSortButtonsVisual('quests', getSortButtonId('quests', field), order);
 }
 
 /**
- * Function to sort Tasks based on field and order
+ * Function to sort Tasks based on field and order, considering grouping
  * @param {string} field - 'title' or 'creation'
  * @param {string} order - 'asc' or 'desc'
  */
@@ -513,28 +609,64 @@ function sortTasks(field, order) {
 
     const tasks = Array.from(tasksContainer.querySelectorAll('.task-card'));
 
-    let sortedTasks = [];
-
-    if (field === 'title') {
-        sortedTasks = tasks.sort((a, b) => {
-            const titleA = a.querySelector('.task-title').textContent.toLowerCase();
-            const titleB = b.querySelector('.task-title').textContent.toLowerCase();
-            if (titleA < titleB) return order === 'asc' ? -1 : 1;
-            if (titleA > titleB) return order === 'asc' ? 1 : -1;
-            return 0;
-        });
-    } else if (field === 'creation') {
-        sortedTasks = tasks.sort((a, b) => {
-            const idA = parseInt(a.getAttribute('data-task-id'));
-            const idB = parseInt(b.getAttribute('data-task-id'));
-            if (idA < idB) return order === 'asc' ? -1 : 1;
-            if (idA > idB) return order === 'asc' ? 1 : -1;
-            return 0;
-        });
+    // If no field specified, default to 'creation' ascending
+    if (!field) {
+        field = 'creation';
+        order = 'asc';
     }
 
-    // Append sorted tasks to the container
-    sortedTasks.forEach(task => tasksContainer.appendChild(task));
+    // Function to get sort value
+    function getSortValue(task) {
+        let value;
+        if (field === 'title') {
+            value = task.querySelector('.task-title').textContent.toLowerCase();
+        } else if (field === 'creation') {
+            value = parseInt(task.getAttribute('data-task-id'));
+        }
+        return value;
+    }
+
+    // If groupObjectives is true, separate tasks into incomplete and complete
+    if (groupObjectives) {
+        const incompleteTasks = tasks.filter(task => !task.classList.contains('completed'));
+        const completeTasks = tasks.filter(task => task.classList.contains('completed'));
+
+        // Sort each group
+        incompleteTasks.sort((a, b) => {
+            const valueA = getSortValue(a);
+            const valueB = getSortValue(b);
+            if (valueA < valueB) return order === 'asc' ? -1 : 1;
+            if (valueA > valueB) return order === 'asc' ? 1 : -1;
+            return 0;
+        });
+
+        completeTasks.sort((a, b) => {
+            const valueA = getSortValue(a);
+            const valueB = getSortValue(b);
+            if (valueA < valueB) return order === 'asc' ? -1 : 1;
+            if (valueA > valueB) return order === 'asc' ? 1 : -1;
+            return 0;
+        });
+
+        // Concatenate the groups
+        const sortedTasks = [...incompleteTasks, ...completeTasks];
+
+        // Append sorted tasks to the container
+        sortedTasks.forEach(task => tasksContainer.appendChild(task));
+
+    } else {
+        // Just sort all tasks
+        tasks.sort((a, b) => {
+            const valueA = getSortValue(a);
+            const valueB = getSortValue(b);
+            if (valueA < valueB) return order === 'asc' ? -1 : 1;
+            if (valueA > valueB) return order === 'asc' ? 1 : -1;
+            return 0;
+        });
+
+        // Append sorted tasks to the container
+        tasks.forEach(task => tasksContainer.appendChild(task));
+    }
 }
 
 /**
@@ -659,6 +791,9 @@ function initializeSortingButtons() {
         sortTitleButton.addEventListener('click', () => {
             toggleSortOrder(sortTitleButton);
             sortTasks('title', sortTitleButton.getAttribute('data-sort-order'));
+            // Save sorting preference
+            saveSortPreference('tasks', 'title', sortTitleButton.getAttribute('data-sort-order'));
+            updateSortButtonsVisual('tasks', 'sort-title-button', sortTitleButton.getAttribute('data-sort-order'));
         });
     }
 
@@ -666,6 +801,9 @@ function initializeSortingButtons() {
         sortCreationTaskButton.addEventListener('click', () => {
             toggleSortOrder(sortCreationTaskButton);
             sortTasks('creation', sortCreationTaskButton.getAttribute('data-sort-order'));
+            // Save sorting preference
+            saveSortPreference('tasks', 'creation', sortCreationTaskButton.getAttribute('data-sort-order'));
+            updateSortButtonsVisual('tasks', 'sort-creation-task-button', sortCreationTaskButton.getAttribute('data-sort-order'));
         });
     }
 }
@@ -697,64 +835,6 @@ function loadSortPreference(category) {
 }
 
 /**
- * Function to initialize SortableJS with drag handles
- */
-function initializeSortable() {
-    // Initialize SortableJS for Quests (Lists)
-    const questsContainer = document.getElementById('quests-container');
-    if (questsContainer) {
-        Sortable.create(questsContainer, {
-            animation: 150,
-            handle: '.drag-handle', // Restrict drag to the drag handle
-            ghostClass: 'sortable-ghost', // Class name for the drop placeholder
-            onEnd: function (evt) {
-                // Update quest order when drag-and-drop action ends
-                updateQuestOrder();
-            },
-            // Optional: Enhance mobile experience
-            delay: 150, // Delay in ms before drag starts
-            touchStartThreshold: 10, // Threshold for touch movements
-        });
-    }
-
-    // Initialize SortableJS for Objectives (Tasks)
-    const objectivesContainer = document.getElementById('objectives-container');
-    if (objectivesContainer) {
-        Sortable.create(objectivesContainer, {
-            animation: 150,
-            handle: '.drag-handle', // Restrict drag to the drag handle
-            ghostClass: 'sortable-ghost',
-            onEnd: function (evt) {
-                // Update objective order when drag-and-drop action ends
-                updateObjectiveOrder();
-            },
-            // Optional: Enhance mobile experience
-            delay: 150,
-            touchStartThreshold: 10,
-        });
-    }
-}
-
-/**
- * Function to apply saved sorting preferences
- */
-function applySavedSortingPreferences() {
-    // Apply Quests Sorting Preference
-    const savedQuestsSort = loadSortPreference('quests');
-    if (savedQuestsSort) {
-        sortQuests(savedQuestsSort.type, savedQuestsSort.order);
-        updateSortButtonsVisual('quests', getSortButtonId('quests', savedQuestsSort.type), savedQuestsSort.order);
-    }
-
-    // Apply Tasks Sorting Preference
-    const savedTasksSort = loadSortPreference('tasks');
-    if (savedTasksSort) {
-        sortTasks(savedTasksSort.type, savedTasksSort.order);
-        updateSortButtonsVisual('tasks', getSortButtonId('tasks', savedTasksSort.type), savedTasksSort.order);
-    }
-}
-
-/**
  * Helper function to get the sort button ID based on category and type
  * @param {string} category - 'quests' or 'tasks'
  * @param {string} type - Sort type (e.g., 'name', 'creation', 'title')
@@ -769,6 +849,38 @@ function getSortButtonId(category, type) {
         if (type === 'creation') return 'sort-creation-task-button';
     }
     return null;
+}
+
+/**
+ * Function to apply saved sorting preferences
+ */
+function applySavedSortingPreferences() {
+    // Apply Group Objectives Preference
+    const savedGroupObjectives = localStorage.getItem(GROUP_OBJECTIVES_KEY);
+    if (savedGroupObjectives !== null) {
+        groupObjectives = savedGroupObjectives === 'true';
+        const groupObjectivesToggle = document.getElementById('group-objectives-toggle');
+        if (groupObjectivesToggle) {
+            groupObjectivesToggle.checked = groupObjectives;
+        }
+    }
+
+    // Apply Tasks Sorting Preference
+    const savedTasksSort = loadSortPreference('tasks');
+    if (savedTasksSort) {
+        sortTasks(savedTasksSort.type, savedTasksSort.order);
+        updateSortButtonsVisual('tasks', getSortButtonId('tasks', savedTasksSort.type), savedTasksSort.order);
+    } else {
+        // If no saved task sort preference, still sort tasks based on groupObjectives
+        sortTasks(null, null); // Use default sorting
+    }
+
+    // Apply Quests Sorting Preference
+    const savedQuestsSort = loadSortPreference('quests');
+    if (savedQuestsSort) {
+        sortQuests(savedQuestsSort.type, savedQuestsSort.order);
+        updateSortButtonsVisual('quests', getSortButtonId('quests', savedQuestsSort.type), savedQuestsSort.order);
+    }
 }
 
 /**
@@ -886,6 +998,23 @@ function initializeEventListeners() {
 
     // Apply saved sorting preferences
     applySavedSortingPreferences();
+
+    // Group Objectives Toggle
+    const groupObjectivesToggle = document.getElementById('group-objectives-toggle');
+    if (groupObjectivesToggle) {
+        groupObjectivesToggle.addEventListener('change', () => {
+            groupObjectives = groupObjectivesToggle.checked;
+            // Save preference to localStorage
+            localStorage.setItem(GROUP_OBJECTIVES_KEY, groupObjectives);
+            // Re-sort tasks
+            const savedTasksSort = loadSortPreference('tasks');
+            if (savedTasksSort) {
+                sortTasks(savedTasksSort.type, savedTasksSort.order);
+            } else {
+                sortTasks(null, null); // Use default sorting
+            }
+        });
+    }
 
     // Add event listeners for existing elements
     document.querySelectorAll('.task-card').forEach(card => {
