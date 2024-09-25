@@ -12,14 +12,18 @@
     <button type="submit">Add</button>
 </form>
 
-<!-- Sort Buttons for Objectives -->
-<div class="sort-buttons">
+<!-- Sort Buttons for Quests and Group Toggle -->
+<div class="sort-and-group-controls">
     <button id="sort-title-button" data-sort-field="title" data-sort-order="asc">
         Sort by Title <span class="sort-icon">&#9650;</span>
     </button>
     <button id="sort-creation-task-button" data-sort-field="creation" data-sort-order="asc">
         Sort by Creation <span class="sort-icon">&#9650;</span>
     </button>
+    <div class="group-toggle">
+        <label for="group-objectives-toggle">Group Objectives</label>
+        <input type="checkbox" id="group-objectives-toggle">
+    </div>
 </div>
 
 <div id="objectives-container" class="tasks-container" data-list-id="{{ list.id }}">

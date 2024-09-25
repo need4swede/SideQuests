@@ -484,25 +484,19 @@ function sortQuests(field, order) {
 
     const quests = Array.from(questsContainer.querySelectorAll('.list-card'));
 
-    let sortedQuests = [];
-
-    if (field === 'name') {
-        sortedQuests = quests.sort((a, b) => {
-            const nameA = a.querySelector('.list-name').textContent.toLowerCase();
-            const nameB = b.querySelector('.list-name').textContent.toLowerCase();
-            if (nameA < nameB) return order === 'asc' ? -1 : 1;
-            if (nameA > nameB) return order === 'asc' ? 1 : -1;
-            return 0;
-        });
-    } else if (field === 'creation') {
-        sortedQuests = quests.sort((a, b) => {
-            const idA = parseInt(a.getAttribute('data-list-id'));
-            const idB = parseInt(b.getAttribute('data-list-id'));
-            if (idA < idB) return order === 'asc' ? -1 : 1;
-            if (idA > idB) return order === 'asc' ? 1 : -1;
-            return 0;
-        });
-    }
+    let sortedQuests = quests.sort((a, b) => {
+        let valueA, valueB;
+        if (field === 'name') {
+            valueA = a.querySelector('.list-name').textContent.toLowerCase();
+            valueB = b.querySelector('.list-name').textContent.toLowerCase();
+        } else if (field === 'creation') {
+            valueA = parseInt(a.getAttribute('data-list-id'));
+            valueB = parseInt(b.getAttribute('data-list-id'));
+        }
+        if (valueA < valueB) return order === 'asc' ? -1 : 1;
+        if (valueA > valueB) return order === 'asc' ? 1 : -1;
+        return 0;
+    });
 
     // Append sorted quests to the container
     sortedQuests.forEach(quest => questsContainer.appendChild(quest));
@@ -609,6 +603,33 @@ function resetSortButtons(category) {
 }
 
 /**
+ * Function to toggle sort order and update button state
+ * @param {HTMLElement} button - The sort button element
+ */
+function toggleSortOrder(button) {
+    const currentOrder = button.getAttribute('data-sort-order');
+    const newOrder = currentOrder === 'asc' ? 'desc' : 'asc';
+    button.setAttribute('data-sort-order', newOrder);
+
+    const sortIcon = button.querySelector('.sort-icon');
+    if (sortIcon) {
+        sortIcon.textContent = newOrder === 'asc' ? '▲' : '▼';
+    }
+
+    // Reset other buttons in the same container
+    const container = button.closest('.sort-and-group-controls');
+    if (container) {
+        container.querySelectorAll('button').forEach(btn => {
+            if (btn !== button) {
+                btn.setAttribute('data-sort-order', 'asc');
+                const icon = btn.querySelector('.sort-icon');
+                if (icon) icon.textContent = '';
+            }
+        });
+    }
+}
+
+/**
  * Function to initialize sorting buttons event listeners
  */
 function initializeSortingButtons() {
@@ -618,43 +639,15 @@ function initializeSortingButtons() {
 
     if (sortNameButton) {
         sortNameButton.addEventListener('click', () => {
-            // Toggle sort order
-            if (questsSortState.type === 'name') {
-                questsSortState.order = questsSortState.order === 'asc' ? 'desc' : 'asc';
-            } else {
-                questsSortState.type = 'name';
-                questsSortState.order = 'asc';
-            }
-
-            // Perform sorting
-            sortQuests('name', questsSortState.order);
-
-            // Update sort buttons' visual state
-            updateSortButtonsVisual('quests', 'sort-name-button', questsSortState.order);
-
-            // Save sort preference to localStorage
-            saveSortPreference('quests', questsSortState.type, questsSortState.order);
+            toggleSortOrder(sortNameButton);
+            sortQuests('name', sortNameButton.getAttribute('data-sort-order'));
         });
     }
 
     if (sortCreationButton) {
         sortCreationButton.addEventListener('click', () => {
-            // Toggle sort order
-            if (questsSortState.type === 'creation') {
-                questsSortState.order = questsSortState.order === 'asc' ? 'desc' : 'asc';
-            } else {
-                questsSortState.type = 'creation';
-                questsSortState.order = 'asc';
-            }
-
-            // Perform sorting
-            sortQuests('creation', questsSortState.order);
-
-            // Update sort buttons' visual state
-            updateSortButtonsVisual('quests', 'sort-creation-button', questsSortState.order);
-
-            // Save sort preference to localStorage
-            saveSortPreference('quests', questsSortState.type, questsSortState.order);
+            toggleSortOrder(sortCreationButton);
+            sortQuests('creation', sortCreationButton.getAttribute('data-sort-order'));
         });
     }
 
@@ -664,43 +657,15 @@ function initializeSortingButtons() {
 
     if (sortTitleButton) {
         sortTitleButton.addEventListener('click', () => {
-            // Toggle sort order
-            if (tasksSortState.type === 'title') {
-                tasksSortState.order = tasksSortState.order === 'asc' ? 'desc' : 'asc';
-            } else {
-                tasksSortState.type = 'title';
-                tasksSortState.order = 'asc';
-            }
-
-            // Perform sorting
-            sortTasks('title', tasksSortState.order);
-
-            // Update sort buttons' visual state
-            updateSortButtonsVisual('tasks', 'sort-title-button', tasksSortState.order);
-
-            // Save sort preference to localStorage
-            saveSortPreference('tasks', tasksSortState.type, tasksSortState.order);
+            toggleSortOrder(sortTitleButton);
+            sortTasks('title', sortTitleButton.getAttribute('data-sort-order'));
         });
     }
 
     if (sortCreationTaskButton) {
         sortCreationTaskButton.addEventListener('click', () => {
-            // Toggle sort order
-            if (tasksSortState.type === 'creation') {
-                tasksSortState.order = tasksSortState.order === 'asc' ? 'desc' : 'asc';
-            } else {
-                tasksSortState.type = 'creation';
-                tasksSortState.order = 'asc';
-            }
-
-            // Perform sorting
-            sortTasks('creation', tasksSortState.order);
-
-            // Update sort buttons' visual state
-            updateSortButtonsVisual('tasks', 'sort-creation-task-button', tasksSortState.order);
-
-            // Save sort preference to localStorage
-            saveSortPreference('tasks', tasksSortState.type, tasksSortState.order);
+            toggleSortOrder(sortCreationTaskButton);
+            sortTasks('creation', sortCreationTaskButton.getAttribute('data-sort-order'));
         });
     }
 }

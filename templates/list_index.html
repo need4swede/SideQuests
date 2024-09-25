@@ -4,22 +4,19 @@
 <header>
     <h1>Your Quests</h1>
 </header>
-
 <form action="{{ url_for('add_list') }}" method="POST" class="add-list-form">
     <input type="text" name="name" placeholder="New Quest">
     <button type="submit">Add</button>
 </form>
-
 <!-- Sort Buttons for Quests -->
-<div class="sort-buttons">
+<div class="sort-and-group-controls">
     <button id="sort-name-button" data-sort-field="name" data-sort-order="asc">
-        Sort by Name <span class="sort-icon">&#9650;</span>
+        Sort by Name <span class="sort-icon"></span>
     </button>
     <button id="sort-creation-button" data-sort-field="creation" data-sort-order="asc">
-        Sort by Creation <span class="sort-icon">&#9650;</span>
+        Sort by Creation <span class="sort-icon"></span>
     </button>
 </div>
-
 <div id="quests-container" class="lists-container">
     {% for quest in lists %}
     <div class="list-card" data-list-id="{{ quest.id }}">
@@ -27,7 +24,6 @@
         <div class="drag-handle" aria-label="Drag Handle" title="Drag to reorder">
             &#9776;
         </div>
-
         <a href="{{ url_for('view_list', list_id=quest.id) }}" style="flex-grow: 1;">
             <div class="list-header">
                 <span class="list-name">{{ quest.name }}</span>
